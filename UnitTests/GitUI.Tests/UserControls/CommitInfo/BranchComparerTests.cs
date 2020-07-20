@@ -29,8 +29,8 @@ namespace GitUITests.UserControls.CommitInfo
 
                 // local branches
                 "1234_issue",
-                "current/2",
                 "current_2",
+                "current/2",
                 "feature/1234_issue",
                 "fix/master",
                 "mastr",

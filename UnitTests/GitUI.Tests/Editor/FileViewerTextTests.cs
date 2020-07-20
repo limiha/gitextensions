@@ -52,7 +52,7 @@ namespace GitUITests.Editor
                 _uiCommandsSource.UICommands.Returns(x => uiCommands);
                 _fileViewer.UICommandsSource = _uiCommandsSource;
                 _fileViewer.GetTestAccessor().FileViewerInternal.SetText(sampleText, null);
-                SelectionManager selectionManager = _fileViewer.GetTestAccessor().FileViewerInternal.GetTestAccessor().TextEditor.ActiveTextAreaControl.TextArea.SelectionManager;
+                using SelectionManager selectionManager = _fileViewer.GetTestAccessor().FileViewerInternal.GetTestAccessor().TextEditor.ActiveTextAreaControl.TextArea.SelectionManager;
 
                 // act
                 selectionManager.SetSelection(new TextLocation(selectedLinePrefix.Length, 1), new TextLocation(selectedLinePrefix.Length + textToSelect.Length, 1));
