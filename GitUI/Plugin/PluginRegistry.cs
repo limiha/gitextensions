@@ -27,26 +27,28 @@ namespace GitUI
                     return;
                 }
 
-                try
-                {
-                    ManagedExtensibility.SetUserPluginsPath(AppSettings.UserPluginsPath);
+                return;
 
-                    foreach (var plugin in ManagedExtensibility.GetExports<IGitPlugin>().Select(lazy => lazy.Value))
-                    {
-                        plugin.SettingsContainer = new GitPluginSettingsContainer(plugin.Name);
+                ////try
+                ////{
+                ////    ManagedExtensibility.SetUserPluginsPath(AppSettings.UserPluginsPath);
 
-                        if (plugin is IRepositoryHostPlugin repositoryHostPlugin)
-                        {
-                            GitHosters.Add(repositoryHostPlugin);
-                        }
+                ////    foreach (var plugin in ManagedExtensibility.GetExports<IGitPlugin>().Select(lazy => lazy.Value))
+                ////    {
+                ////        plugin.SettingsContainer = new GitPluginSettingsContainer(plugin.Name);
 
-                        Plugins.Add(plugin);
-                    }
-                }
-                catch
-                {
-                    // no-op
-                }
+                ////        if (plugin is IRepositoryHostPlugin repositoryHostPlugin)
+                ////        {
+                ////            GitHosters.Add(repositoryHostPlugin);
+                ////        }
+
+                ////        Plugins.Add(plugin);
+                ////    }
+                ////}
+                ////catch
+                ////{
+                ////    // no-op
+                ////}
             }
         }
 
@@ -70,10 +72,10 @@ namespace GitUI
 
             PluginsRegistered = true;
 
-            lock (Plugins)
-            {
-                Plugins.ForEach(p => p.Register(gitUiCommands));
-            }
+            ////lock (Plugins)
+            ////{
+            ////    Plugins.ForEach(p => p.Register(gitUiCommands));
+            ////}
         }
 
         public static void Unregister(IGitUICommands gitUiCommands)
@@ -83,10 +85,10 @@ namespace GitUI
                 return;
             }
 
-            lock (Plugins)
-            {
-                Plugins.ForEach(p => p.Unregister(gitUiCommands));
-            }
+            ////lock (Plugins)
+            ////{
+            ////    Plugins.ForEach(p => p.Unregister(gitUiCommands));
+            ////}
 
             PluginsRegistered = false;
         }
