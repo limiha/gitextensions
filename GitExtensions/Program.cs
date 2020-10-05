@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -42,8 +42,8 @@ namespace GitExtensions
             // There's no perf hit calling Initialise() multiple times.
             UserEnvironmentInformation.Initialise(ThisAssembly.Git.Sha, ThisAssembly.Git.IsDirty);
 
-            ThemeModule.Load();
-            Application.ApplicationExit += (s, e) => ThemeModule.Unload();
+            ////ThemeModule.Load();
+            ////Application.ApplicationExit += (s, e) => ThemeModule.Unload();
 
             HighDpiMouseCursors.Enable();
 
