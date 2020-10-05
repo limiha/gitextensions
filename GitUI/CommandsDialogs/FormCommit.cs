@@ -29,7 +29,7 @@ using GitUI.Hotkey;
 using GitUI.Properties;
 using GitUI.Script;
 using GitUI.SpellChecker;
-using GitUI.Theming;
+//using GitUI.Theming;
 using GitUI.UserControls;
 using GitUIPluginInterfaces;
 using JetBrains.Annotations;
@@ -317,7 +317,7 @@ namespace GitUI.CommandsDialogs
             SelectedDiff.TopScrollReached += FileViewer_TopScrollReached;
             SelectedDiff.BottomScrollReached += FileViewer_BottomScrollReached;
 
-            SolveMergeconflicts.BackColor = AppColor.Branch.GetThemeColor();
+            ////SolveMergeconflicts.BackColor = AppColor.Branch.GetThemeColor();
             SolveMergeconflicts.SetForeColorForBackColor();
 
             toolStripStatusBranchIcon.AdaptImageLightness();
@@ -3251,9 +3251,9 @@ namespace GitUI.CommandsDialogs
 
             if (AppSettings.CommitAndPushForcedWhenAmend)
             {
-                CommitAndPush.BackColor = Amend.Checked
-                    ? AppColor.Branch.GetThemeColor()
-                    : SystemColors.ButtonFace;
+                ////CommitAndPush.BackColor = Amend.Checked
+                ////    ? AppColor.Branch.GetThemeColor()
+                ////    : SystemColors.ButtonFace;
 
                 CommitAndPush.SetForeColorForBackColor();
             }

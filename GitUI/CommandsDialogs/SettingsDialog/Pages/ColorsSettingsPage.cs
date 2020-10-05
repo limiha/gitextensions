@@ -5,7 +5,6 @@ using System.Linq;
 using GitCommands;
 using GitExtUtils.GitUI;
 using GitExtUtils.GitUI.Theming;
-using GitUI.Theming;
 using ResourceManager;
 
 namespace GitUI.CommandsDialogs.SettingsDialog.Pages
@@ -13,8 +12,8 @@ namespace GitUI.CommandsDialogs.SettingsDialog.Pages
     public partial class ColorsSettingsPage : SettingsPageWithHeader
     {
         private int _updateThemeSettingsCounter;
-        private readonly ThemeRepository _themeRepository = new ThemeRepository();
-        private readonly ThemePathProvider _themePathProvider = new ThemePathProvider();
+        ////private readonly ThemeRepository _themeRepository = new ThemeRepository();
+        ////private readonly ThemePathProvider _themePathProvider = new ThemePathProvider();
 
         private static readonly TranslationString FormatBuiltinThemeName =
             new TranslationString("{0}");
@@ -95,10 +94,10 @@ namespace GitUI.CommandsDialogs.SettingsDialog.Pages
             BeginUpdateThemeSettings();
             _NO_TRANSLATE_cbSelectTheme.Items.Clear();
             _NO_TRANSLATE_cbSelectTheme.Items.Add(new FormattedThemeId(ThemeId.Default));
-            _NO_TRANSLATE_cbSelectTheme.Items.AddRange(_themeRepository.GetThemeIds()
-                .Select(id => new FormattedThemeId(id))
-                .Cast<object>()
-                .ToArray());
+            ////_NO_TRANSLATE_cbSelectTheme.Items.AddRange(_themeRepository.GetThemeIds()
+            ////    .Select(id => new FormattedThemeId(id))
+            ////    .Cast<object>()
+            ////    .ToArray());
             SelectedThemeId = AppSettings.ThemeId;
             SelectedThemeVariations = AppSettings.ThemeVariations;
             UseSystemVisualStyle = AppSettings.UseSystemVisualStyle;
@@ -168,29 +167,29 @@ namespace GitUI.CommandsDialogs.SettingsDialog.Pages
 
             if (counter == 0)
             {
-                bool settingsChanged =
-                    UseSystemVisualStyle != ThemeModule.Settings.UseSystemVisualStyle ||
-                    SelectedThemeId != ThemeModule.Settings.Theme.Id ||
-                    !SelectedThemeVariations.SequenceEqual(AppSettings.ThemeVariations);
+                bool settingsChanged = false;
+                    ////UseSystemVisualStyle != ThemeModule.Settings.UseSystemVisualStyle ||
+                    ////SelectedThemeId != ThemeModule.Settings.Theme.Id ||
+                    ////!SelectedThemeVariations.SequenceEqual(AppSettings.ThemeVariations);
 
                 lblRestartNeeded.Visible = settingsChanged;
                 chkColorblind.Enabled =
                     chkUseSystemVisualStyle.Enabled = SelectedThemeId != ThemeId.Default;
             }
 
-            if (SelectedThemeId != ThemeId.Default)
-            {
-                try
-                {
-                    Theme unused = _themeRepository.GetTheme(SelectedThemeId, SelectedThemeVariations);
-                }
-                catch (Exception ex)
-                {
-                    string variations = string.Concat(SelectedThemeVariations.Select(_ => "." + _));
-                    string identifier = new FormattedThemeId(SelectedThemeId).ToString();
-                    MessageBoxes.ShowError(this, $"Failed to load theme {identifier}{variations}: {ex}");
-                }
-            }
+            ////if (SelectedThemeId != ThemeId.Default)
+            ////{
+            ////    try
+            ////    {
+            ////        Theme unused = _themeRepository.GetTheme(SelectedThemeId, SelectedThemeVariations);
+            ////    }
+            ////    catch (Exception ex)
+            ////    {
+            ////        string variations = string.Concat(SelectedThemeVariations.Select(_ => "." + _));
+            ////        string identifier = new FormattedThemeId(SelectedThemeId).ToString();
+            ////        MessageBoxes.ShowError(this, $"Failed to load theme {identifier}{variations}: {ex}");
+            ////    }
+            ////}
         }
 
         private struct FormattedThemeId
@@ -233,9 +232,9 @@ namespace GitUI.CommandsDialogs.SettingsDialog.Pages
                 ThemeId.Equals(other.ThemeId);
         }
 
-        private void tsmiApplicationFolder_Click(object sender, EventArgs e) => OpenFolder(_themePathProvider.AppThemesDirectory);
+        private void tsmiApplicationFolder_Click(object sender, EventArgs e) => OpenFolder("_themePathProvider.AppThemesDirectory");
 
-        private void tsmiUserFolder_Click(object sender, EventArgs e) => OpenFolder(_themePathProvider.UserThemesDirectory);
+        private void tsmiUserFolder_Click(object sender, EventArgs e) => OpenFolder("_themePathProvider.UserThemesDirectory");
 
         private void OpenFolder(string folderPath)
         {
