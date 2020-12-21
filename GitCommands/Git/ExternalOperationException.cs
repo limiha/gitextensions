@@ -18,7 +18,7 @@ namespace GitCommands
         /// <param name="arguments">The command arguments.</param>
         /// <param name="workingDirectory">The working directory.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public ExternalOperationException(string command, string arguments, string workingDirectory, Exception innerException)
+        public ExternalOperationException(string command, string arguments, string workingDirectory, Exception? innerException)
             : base(innerException?.Message, innerException)
         {
             Command = command;

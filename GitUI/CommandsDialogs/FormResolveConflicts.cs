@@ -13,6 +13,8 @@ using GitUI.HelperDialogs;
 using GitUI.Hotkey;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ResourceManager;
+using TaskDialog = Microsoft.WindowsAPICodePack.Dialogs.TaskDialog;
+using TaskDialogStartupLocation = Microsoft.WindowsAPICodePack.Dialogs.TaskDialogStartupLocation;
 
 namespace GitUI.CommandsDialogs
 {

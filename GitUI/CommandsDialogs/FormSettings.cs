@@ -14,6 +14,7 @@ using GitUI.Properties;
 using JetBrains.Annotations;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ResourceManager;
+using TaskDialog = Microsoft.WindowsAPICodePack.Dialogs.TaskDialog;
 
 namespace GitUI.CommandsDialogs
 {

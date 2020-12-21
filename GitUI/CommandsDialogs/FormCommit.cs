@@ -1385,14 +1385,14 @@ namespace GitUI.CommandsDialogs
                 {
                     int dialogResult = -1;
 
-                    using var dialog = new TaskDialog
+                    using var dialog = new Microsoft.WindowsAPICodePack.Dialogs.TaskDialog
                     {
                         OwnerWindowHandle = Handle,
                         Text = _notOnBranch.Text,
                         InstructionText = Strings.ErrorInstructionNotOnBranch,
                         Caption = Strings.ErrorCaptionNotOnBranch,
                         StandardButtons = TaskDialogStandardButtons.Cancel,
-                        Icon = TaskDialogStandardIcon.Error,
+                        Icon = Microsoft.WindowsAPICodePack.Dialogs.TaskDialogStandardIcon.Error,
                         Cancelable = true,
                     };
                     var btnCheckout = new TaskDialogCommandLink("Checkout", null, Strings.ButtonCheckoutBranch);

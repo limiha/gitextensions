@@ -15,6 +15,8 @@ using GitUIPluginInterfaces.BuildServerIntegration;
 using Microsoft.VisualStudio.Threading;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ResourceManager;
+using TaskDialog = Microsoft.WindowsAPICodePack.Dialogs.TaskDialog;
+using TaskDialogButton = Microsoft.WindowsAPICodePack.Dialogs.TaskDialogButton;
 
 namespace AzureDevOpsIntegration
 {

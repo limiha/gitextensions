@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using GitCommands;
 using GitUI;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using TaskDialog = Microsoft.WindowsAPICodePack.Dialogs.TaskDialog;
 
 namespace GitExtensions
 {
