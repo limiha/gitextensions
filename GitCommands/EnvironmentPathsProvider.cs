@@ -74,7 +74,7 @@ namespace GitCommands
         {
             try
             {
-                var _ = new FileInfo(path).Attributes;
+                _ = new FileInfo(path).Attributes;
                 return true;
             }
             catch (ArgumentException)

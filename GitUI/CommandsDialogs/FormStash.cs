@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Management;
-using System.Text;
 using System.Windows.Forms;
 using GitCommands;
 using GitCommands.Git;
-using GitCommands.Patches;
 using GitExtUtils.GitUI;
 using GitUIPluginInterfaces;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -271,7 +268,7 @@ namespace GitUI.CommandsDialogs
                 var stashName = GetStashName();
                 if (AppSettings.StashConfirmDropShow)
                 {
-                    using var dialog = new TaskDialog
+                    using var dialog = new Microsoft.WindowsAPICodePack.Dialogs.TaskDialog
                     {
                         OwnerWindowHandle = Handle,
                         Text = _areYouSure.Text,
@@ -281,7 +278,7 @@ namespace GitUI.CommandsDialogs
                         Icon = TaskDialogStandardIcon.Information,
                         FooterCheckBoxText = _dontShowAgain.Text,
                         FooterIcon = TaskDialogStandardIcon.Information,
-                        StartupLocation = TaskDialogStartupLocation.CenterOwner,
+                        StartupLocation = Microsoft.WindowsAPICodePack.Dialogs.TaskDialogStartupLocation.CenterOwner,
                     };
 
                     TaskDialogResult result = dialog.Show();

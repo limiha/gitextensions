@@ -95,7 +95,9 @@ namespace GitCommands
                     using (var rs = new MemoryStream(memoryData, 0, length))
                     {
                         var sf = new BinaryFormatter { Binder = new MoveNamespaceDeserializationBinder() };
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
                         commitTemplateItem = (CommitTemplateItem[])sf.Deserialize(rs);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
                     }
 
                     shouldBeUpdated = true;

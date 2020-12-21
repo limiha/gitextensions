@@ -1,18 +1,20 @@
 <Project>
-  <Import Project=".\scripts\sdk\Sdk.props" />
+  <Import Project="Solution.Versions.props" />
 
   <PropertyGroup>
     <LangVersion>8</LangVersion>
     <NoWarn>$(NoWarn);1573;1591;1712</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <Prefer32Bit>false</Prefer32Bit>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisRuleSet>..\GitExtensions.ruleset</CodeAnalysisRuleSet>
 
     <!-- TODO once all project migrated to SDK-style, remove this and move properties to Directory.Build.props -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 
     <IsPublishable>false</IsPublishable>
   </PropertyGroup>
@@ -44,5 +46,7 @@
       <Visible>False</Visible>
     </AdditionalFiles>
   </ItemGroup>
+
+  <Import Project="scripts\tools\Tests.props" />
 
 </Project>

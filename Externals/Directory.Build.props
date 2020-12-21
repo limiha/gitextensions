@@ -3,6 +3,8 @@
   <Import Project="..\Solution.Versions.props" />
 
   <PropertyGroup>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+
     <_SuppressSdkImports>true</_SuppressSdkImports>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPublishable>false</IsPublishable>

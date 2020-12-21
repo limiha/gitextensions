@@ -512,7 +512,7 @@ namespace AppVeyorIntegration
                 return task.CompletedResult().Content.ReadAsStreamAsync();
             }
 
-            return null;
+            return Task.FromResult<Stream>(null);
         }
 
         private Task<string> GetResponseAsync(HttpClient httpClient, string relativePath, CancellationToken cancellationToken)

@@ -10,7 +10,6 @@ using GitUI;
 using GitUI.CommandsDialogs.SettingsDialog;
 using GitUI.CommandsDialogs.SettingsDialog.Pages;
 using GitUI.Infrastructure.Telemetry;
-using GitUI.Theming;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.Threading;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -303,7 +302,7 @@ namespace GitExtensions
         {
             int dialogResult = -1;
 
-            using var dialog1 = new TaskDialog
+            using var dialog1 = new Microsoft.WindowsAPICodePack.Dialogs.TaskDialog
             {
                 InstructionText = ResourceManager.Strings.GitExecutableNotFound,
                 Icon = TaskDialogStandardIcon.Error,
