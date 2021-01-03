@@ -64,7 +64,9 @@ namespace GitUI.BranchTreePanel
             {
                 base.ApplyStyle();
 
-                TreeViewNode.ForeColor = Visible ? TreeViewNode.TreeView.ForeColor : Color.Silver.AdaptTextColor();
+                TreeViewNode.ForeColor = Visible
+                    ? TreeViewNode.TreeView?.ForeColor ?? SystemColors.ControlText
+                    : Color.Silver.AdaptTextColor();
                 TreeViewNode.ImageKey =
                     TreeViewNode.SelectedImageKey = Visible ? null : nameof(Images.EyeClosed);
             }
