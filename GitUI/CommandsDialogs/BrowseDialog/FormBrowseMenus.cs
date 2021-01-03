@@ -22,17 +22,11 @@ namespace GitUI.CommandsDialogs
         /// </summary>
         private readonly ToolStrip _mainMenuStrip;
 
-        /// <summary>
-        /// The context menu that be shown to allow toggle visibilty of toolbars in <see cref="FormBrowse"/>.
-        /// </summary>
-        private readonly ContextMenuStrip _toolStripContextMenu = new ContextMenuStrip();
-
         private List<MenuCommand> _navigateMenuCommands;
         private List<MenuCommand> _viewMenuCommands;
 
         private ToolStripMenuItem _navigateToolStripMenuItem;
         private ToolStripMenuItem _viewToolStripMenuItem;
-        private ToolStripMenuItem _toolbarsMenuItem;
 
         // we have to remember which items we registered with the menucommands because other
         // location (RevisionGrid) can register items too!
@@ -44,8 +38,6 @@ namespace GitUI.CommandsDialogs
 
             CreateMenuItems();
             Translate();
-
-            _toolStripContextMenu.Opening += (s, e) => RefreshToolbarsMenuItemCheckedState(_toolStripContextMenu.Items);
         }
 
         public void Dispose()
@@ -60,7 +52,6 @@ namespace GitUI.CommandsDialogs
             {
                 _navigateToolStripMenuItem.Dispose();
                 _viewToolStripMenuItem.Dispose();
-                _toolbarsMenuItem.Dispose();
             }
         }
 
@@ -78,43 +69,6 @@ namespace GitUI.CommandsDialogs
         {
             TranslationUtils.TranslateItemsFromList("FormBrowse", translation, GetAdditionalMainMenuItemsForTranslation());
         }
-
-        /// <summary>
-        /// Creates menu items for each toolbar supplied in <paramref name="toolStrips"/>. These menus will
-        /// be surfaced in <see cref="_mainMenuStrip"/>, and <see cref="_toolStripContextMenu"/>,
-        /// and will allow to toggle visibility of the toolbars.
-        /// </summary>
-        /// <param name="toolStrips">The list of toobars to toggle visibility for.</param>
-        public void CreateToolbarsMenus(params ToolStripEx[] toolStrips)
-        {
-            Debug.Assert(_toolbarsMenuItem != null, "Toolbars menu item must be already created.");
-
-            foreach (ToolStrip toolStrip in toolStrips)
-            {
-                Debug.Assert(!string.IsNullOrEmpty(toolStrip.Text), "Toolstrip must specify its name via Text property.");
-
-                _toolStripContextMenu.Items.Add(CreateItem(toolStrip));
-                _toolbarsMenuItem.DropDownItems.Add(CreateItem(toolStrip));
-            }
-
-            static ToolStripItem CreateItem(ToolStrip senderToolStrip)
-            {
-                var toolStripItem = new ToolStripMenuItem(senderToolStrip.Text)
-                {
-                    Checked = senderToolStrip.Visible,
-                    CheckOnClick = true,
-                    Tag = senderToolStrip
-                };
-                toolStripItem.Click += (s, e) =>
-                {
-                    senderToolStrip.Visible = !senderToolStrip.Visible;
-                };
-
-                return toolStripItem;
-            }
-        }
-
-        public void ShowToolStripContextMenu(Point point) => _toolStripContextMenu.Show(point);
 
         public void ResetMenuCommandSets()
         {
@@ -180,14 +134,6 @@ namespace GitUI.CommandsDialogs
             _mainMenuStrip.Items.Insert(_mainMenuStrip.Items.IndexOf(insertAfterMenuItem) + 1, _navigateToolStripMenuItem);
             _mainMenuStrip.Items.Insert(_mainMenuStrip.Items.IndexOf(_navigateToolStripMenuItem) + 1, _viewToolStripMenuItem);
 
-            // We're a bit lying here - "Toolbars" is not a RevisionGrid menu item,
-            // however it is the logical place to add it to the "View" menu
-            if (_toolbarsMenuItem.DropDownItems.Count > 0)
-            {
-                _viewToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
-                _viewToolStripMenuItem.DropDownItems.Add(_toolbarsMenuItem);
-            }
-
             // maybe set check marks on menu items
             OnMenuCommandsPropertyChanged();
         }
@@ -218,21 +164,11 @@ namespace GitUI.CommandsDialogs
                     Text = "View"
                 };
             }
-
-            if (_toolbarsMenuItem is null)
-            {
-                _toolbarsMenuItem = new ToolStripMenuItem
-                {
-                    Name = "toolbarsMenuItem",
-                    Text = "Toolbars",
-                };
-                _toolbarsMenuItem.DropDownOpening += (s, e) => RefreshToolbarsMenuItemCheckedState(_toolbarsMenuItem.DropDownItems);
-            }
         }
 
         private IEnumerable<(string name, object item)> GetAdditionalMainMenuItemsForTranslation()
         {
-            foreach (ToolStripMenuItem menuItem in new[] { _navigateToolStripMenuItem, _viewToolStripMenuItem, _toolbarsMenuItem })
+            foreach (ToolStripMenuItem menuItem in new[] { _navigateToolStripMenuItem, _viewToolStripMenuItem })
             {
                 yield return (menuItem.Name, menuItem);
             }
@@ -302,15 +238,6 @@ namespace GitUI.CommandsDialogs
             else
             {
                 throw new ApplicationException("this case is not allowed");
-            }
-        }
-
-        private void RefreshToolbarsMenuItemCheckedState(ToolStripItemCollection toolStripItems)
-        {
-            foreach (ToolStripMenuItem item in toolStripItems)
-            {
-                Debug.Assert(item.Tag is ToolStrip, "Toolbars context menu items must reference Toolstrips via Tag property.");
-                item.Checked = ((ToolStrip)item.Tag).Visible;
             }
         }
     }
