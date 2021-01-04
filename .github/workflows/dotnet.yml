@@ -1,0 +1,44 @@
+name: Build the app
+
+on:
+  push:
+    branches: Convert_to_.NET_5.0_build
+
+# Here the environment variable is declared in workflow level
+env:
+  BUILD_VERSION: 4.0.0.${{ github.run_number }}
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.6'
+
+    - uses: actions/checkout@v2
+
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+
+    - name: Set version
+      run: |
+        pushd .\scripts
+        python set_version_to.py -v ${{ env.BUILD_VERSION }} -t ${{ env.BUILD_VERSION }}
+        popd
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    #- name: Test
+    #  run: dotnet test --no-build --verbosity normal
