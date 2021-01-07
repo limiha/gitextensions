@@ -9,6 +9,7 @@ using GitCommands.Git.Commands;
 using GitCommands.Patches;
 using GitExtUtils.GitUI.Theming;
 using GitUI.HelperDialogs;
+using GitUI.Theming;
 using ResourceManager;
 
 namespace GitUI.CommandsDialogs
@@ -45,7 +46,7 @@ namespace GitUI.CommandsDialogs
         {
             _defaultBranch = defaultBranch;
             InitializeComponent();
-            ////SolveMergeconflicts.BackColor = AppColor.Branch.GetThemeColor();
+            SolveMergeconflicts.BackColor = AppColor.Branch.GetThemeColor();
             SolveMergeconflicts.SetForeColorForBackColor();
             helpImageDisplayUserControl1.Image1 = Properties.Images.HelpCommandRebase.AdaptLightness();
             InitializeComplete();

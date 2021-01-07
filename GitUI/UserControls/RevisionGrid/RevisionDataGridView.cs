@@ -11,6 +11,7 @@ using GitCommands;
 using GitExtUtils;
 using GitExtUtils.GitUI;
 using GitExtUtils.GitUI.Theming;
+using GitUI.Theming;
 using GitUI.UserControls.RevisionGrid.Columns;
 using GitUI.UserControls.RevisionGrid.Graph;
 using GitUIPluginInterfaces;
@@ -271,10 +272,10 @@ namespace GitUI.UserControls.RevisionGrid
                 return SystemBrushes.Highlight;
             }
 
-            ////if (AppSettings.HighlightAuthoredRevisions && revision != null && !revision.IsArtificial && AuthorHighlighting.IsHighlighted(revision))
-            ////{
-            ////    return new SolidBrush(AppColor.AuthoredHighlight.GetThemeColor());
-            ////}
+            if (AppSettings.HighlightAuthoredRevisions && revision != null && !revision.IsArtificial && AuthorHighlighting.IsHighlighted(revision))
+            {
+                return new SolidBrush(AppColor.AuthoredHighlight.GetThemeColor());
+            }
 
             if (rowIndex % 2 == 0 && AppSettings.RevisionGraphDrawAlternateBackColor)
             {

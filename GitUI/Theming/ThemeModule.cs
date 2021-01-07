@@ -73,6 +73,7 @@ namespace GitUI.Theming
                 return CreateFallbackSettings(invariantTheme);
             }
 
+            /*
             try
             {
                 InstallHooks(theme);
@@ -82,6 +83,7 @@ namespace GitUI.Theming
                 MessageBoxes.ShowError(null, $"Failed to install Win32 theming hooks: {ex}");
                 return CreateFallbackSettings(invariantTheme);
             }
+            */
 
             IsDarkTheme = theme.SysColorValues[KnownColor.Window].GetBrightness() < 0.5;
 

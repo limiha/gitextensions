@@ -10,6 +10,7 @@ using GitUI;
 using GitUI.CommandsDialogs.SettingsDialog;
 using GitUI.CommandsDialogs.SettingsDialog.Pages;
 using GitUI.Infrastructure.Telemetry;
+using GitUI.Theming;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.Threading;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -41,8 +42,8 @@ namespace GitExtensions
             // There's no perf hit calling Initialise() multiple times.
             UserEnvironmentInformation.Initialise(ThisAssembly.Git.Sha, ThisAssembly.Git.IsDirty);
 
-            ////ThemeModule.Load();
-            ////Application.ApplicationExit += (s, e) => ThemeModule.Unload();
+            ThemeModule.Load();
+            Application.ApplicationExit += (s, e) => ThemeModule.Unload();
 
             HighDpiMouseCursors.Enable();
 

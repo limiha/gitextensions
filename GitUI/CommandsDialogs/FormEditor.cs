@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using GitExtUtils.GitUI.Theming;
 using GitUI.Editor;
+using GitUI.Theming;
 using JetBrains.Annotations;
 using ResourceManager;
 
@@ -31,7 +32,7 @@ namespace GitUI.CommandsDialogs
         {
             _fileName = fileName;
             InitializeComponent();
-            ////panelMessage.BackColor = AppColor.Branch.GetThemeColor();
+            panelMessage.BackColor = AppColor.Branch.GetThemeColor();
             panelMessage.SetForeColorForBackColor();
             InitializeComplete();
 

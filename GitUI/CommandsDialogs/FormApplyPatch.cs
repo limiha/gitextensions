@@ -9,7 +9,7 @@ using GitCommands.Git.Commands;
 using GitCommands.Patches;
 using GitExtUtils.GitUI.Theming;
 using GitUI.HelperDialogs;
-//using GitUI.Theming;
+using GitUI.Theming;
 using ResourceManager;
 
 namespace GitUI.CommandsDialogs
@@ -52,7 +52,7 @@ namespace GitUI.CommandsDialogs
 
             patchGrid1.SetSkipped(Skipped);
 
-            // SolveMergeConflicts.BackColor = AppColor.Branch.GetThemeColor();
+            SolveMergeConflicts.BackColor = AppColor.Branch.GetThemeColor();
             SolveMergeConflicts.SetForeColorForBackColor();
         }
 

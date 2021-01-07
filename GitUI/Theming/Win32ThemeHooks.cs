@@ -1,353 +1,354 @@
-﻿////using System;
-////using System.Collections.Generic;
-////using System.Diagnostics;
-////using System.Drawing;
-////using System.Linq;
-////using System.Runtime.InteropServices;
-////using EasyHook;
-////using GitExtUtils.GitUI.Theming;
-////using GitUI.UserControls;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Runtime.InteropServices;
+using EasyHook;
+using GitExtUtils.GitUI.Theming;
+using GitUI.UserControls;
 
-////namespace GitUI.Theming
-////{
-////    internal static class Win32ThemeHooks
-////    {
-////        private static Theme _theme;
+namespace GitUI.Theming
+{
+    internal static class Win32ThemeHooks
+    {
+        private static Theme _theme;
 
-////        private static GetSysColorDelegate _getSysColorBypass;
-////        private static GetSysColorBrushDelegate _getSysColorBrushBypass;
-////        private static DrawThemeBackgroundDelegate _drawThemeBackgroundBypass;
-////        private static DrawThemeBackgroundExDelegate _drawThemeBackgroundExBypass;
-////        private static GetThemeColorDelegate _getThemeColorBypass;
-////        private static DrawThemeTextDelegate _drawThemeTextBypass;
-////        private static DrawThemeTextExDelegate _drawThemeTextExBypass;
-////        private static CreateWindowExDelegate _createWindowExBypass;
+        private static GetSysColorDelegate _getSysColorBypass;
+        private static GetSysColorBrushDelegate _getSysColorBrushBypass;
+        private static DrawThemeBackgroundDelegate _drawThemeBackgroundBypass;
+        private static DrawThemeBackgroundExDelegate _drawThemeBackgroundExBypass;
+        private static GetThemeColorDelegate _getThemeColorBypass;
+        private static DrawThemeTextDelegate _drawThemeTextBypass;
+        private static DrawThemeTextExDelegate _drawThemeTextExBypass;
+        private static CreateWindowExDelegate _createWindowExBypass;
 
-////        private static LocalHook _getSysColorHook;
-////        private static LocalHook _getSysColorBrushHook;
-////        private static LocalHook _drawThemeBackgroundHook;
-////        private static LocalHook _drawThemeBackgroundExHook;
-////        private static LocalHook _getThemeColorHook;
-////        private static LocalHook _drawThemeTextHook;
-////        private static LocalHook _drawThemeTextExHook;
-////        private static LocalHook _createWindowExHook;
+        private static LocalHook _getSysColorHook;
+        private static LocalHook _getSysColorBrushHook;
+        private static LocalHook _drawThemeBackgroundHook;
+        private static LocalHook _drawThemeBackgroundExHook;
+        private static LocalHook _getThemeColorHook;
+        private static LocalHook _drawThemeTextHook;
+        private static LocalHook _drawThemeTextExHook;
+        private static LocalHook _createWindowExHook;
 
-////        private static ThemeRenderer[] _renderers;
-////        private static SystemDialogDetector _systemDialogDetector;
+        private static ThemeRenderer[] _renderers;
+        private static SystemDialogDetector _systemDialogDetector;
 
-////        public static event Action<IntPtr> WindowCreated;
+        public static event Action<IntPtr> WindowCreated;
 
-////        internal static ThemeSettings ThemeSettings { private get; set; } = ThemeSettings.Default;
+        internal static ThemeSettings ThemeSettings { private get; set; } = ThemeSettings.Default;
 
-////        private static readonly HashSet<NativeListView> InitializingListViews = new HashSet<NativeListView>();
+        private static readonly HashSet<NativeListView> InitializingListViews = new HashSet<NativeListView>();
 
-////        private static bool BypassThemeRenderers =>
-////            ThemeSettings.UseSystemVisualStyle || BypassAnyHook;
+        private static bool BypassThemeRenderers =>
+            ThemeSettings.UseSystemVisualStyle || BypassAnyHook;
 
-////        private static bool BypassAnyHook =>
-////            _systemDialogDetector?.IsSystemDialogOpen == true;
+        private static bool BypassAnyHook => true; // TODO: _systemDialogDetector?.IsSystemDialogOpen == true;
 
-////        public static void InstallHooks(Theme theme, SystemDialogDetector systemDialogDetector)
-////        {
-////            _theme = theme;
-////            _systemDialogDetector = systemDialogDetector;
+        public static void InstallHooks(Theme theme, SystemDialogDetector systemDialogDetector)
+        {
+            if (BypassAnyHook)
+                return;
 
-////            (_getSysColorBrushHook, _getSysColorBrushBypass) = InstallHook<GetSysColorBrushDelegate>(
-////                "user32.dll",
-////                "GetSysColorBrush",
-////                GetSysColorBrushHook);
+            _theme = theme;
+            _systemDialogDetector = systemDialogDetector;
 
-////            (_getSysColorHook, _getSysColorBypass) = InstallHook<GetSysColorDelegate>(
-////                "user32.dll",
-////                "GetSysColor",
-////                GetSysColorHook);
+            (_getSysColorBrushHook, _getSysColorBrushBypass) = InstallHook<GetSysColorBrushDelegate>(
+                "user32.dll",
+                "GetSysColorBrush",
+                GetSysColorBrushHook);
 
-////            (_drawThemeBackgroundHook, _drawThemeBackgroundBypass) =
-////                InstallHook<DrawThemeBackgroundDelegate>(
-////                    "uxtheme.dll",
-////                    "DrawThemeBackground",
-////                    DrawThemeBackgroundHook);
+            (_getSysColorHook, _getSysColorBypass) = InstallHook<GetSysColorDelegate>(
+                "user32.dll",
+                "GetSysColor",
+                GetSysColorHook);
 
-////            (_drawThemeBackgroundExHook, _drawThemeBackgroundExBypass) =
-////                InstallHook<DrawThemeBackgroundExDelegate>(
-////                    "uxtheme.dll",
-////                    "DrawThemeBackgroundEx",
-////                    DrawThemeBackgroundExHook);
+            (_drawThemeBackgroundHook, _drawThemeBackgroundBypass) =
+                InstallHook<DrawThemeBackgroundDelegate>(
+                    "uxtheme.dll",
+                    "DrawThemeBackground",
+                    DrawThemeBackgroundHook);
 
-////            (_getThemeColorHook, _getThemeColorBypass) =
-////                InstallHook<GetThemeColorDelegate>(
-////                    "uxtheme.dll",
-////                    "GetThemeColor",
-////                    GetThemeColorHook);
+            (_drawThemeBackgroundExHook, _drawThemeBackgroundExBypass) =
+                InstallHook<DrawThemeBackgroundExDelegate>(
+                    "uxtheme.dll",
+                    "DrawThemeBackgroundEx",
+                    DrawThemeBackgroundExHook);
 
-////            (_drawThemeTextHook, _drawThemeTextBypass) =
-////                InstallHook<DrawThemeTextDelegate>(
-////                    "uxtheme.dll",
-////                    "DrawThemeText",
-////                    DrawThemeTextHook);
+            (_getThemeColorHook, _getThemeColorBypass) =
+                InstallHook<GetThemeColorDelegate>(
+                    "uxtheme.dll",
+                    "GetThemeColor",
+                    GetThemeColorHook);
 
-////            (_drawThemeTextExHook, _drawThemeTextExBypass) =
-////                InstallHook<DrawThemeTextExDelegate>(
-////                    "uxtheme.dll",
-////                    "DrawThemeTextEx",
-////                    DrawThemeTextExHook);
+            (_drawThemeTextHook, _drawThemeTextBypass) =
+                InstallHook<DrawThemeTextDelegate>(
+                    "uxtheme.dll",
+                    "DrawThemeText",
+                    DrawThemeTextHook);
 
-////            (_createWindowExHook, _createWindowExBypass) =
-////                InstallHook<CreateWindowExDelegate>(
-////                    "user32.dll",
-////                    "CreateWindowExW",
-////                    CreateWindowExHook);
+            (_drawThemeTextExHook, _drawThemeTextExBypass) =
+                InstallHook<DrawThemeTextExDelegate>(
+                    "uxtheme.dll",
+                    "DrawThemeTextEx",
+                    DrawThemeTextExHook);
 
-////            NativeListView.BeginCreateHandle += ListView_BeginCreateHandle;
-////            NativeListView.EndCreateHandle += ListView_EndCreateHandle;
+            (_createWindowExHook, _createWindowExBypass) =
+                InstallHook<CreateWindowExDelegate>(
+                    "user32.dll",
+                    "CreateWindowExW",
+                    CreateWindowExHook);
 
-////            CreateRenderers();
-////        }
+            NativeListView.BeginCreateHandle += ListView_BeginCreateHandle;
+            NativeListView.EndCreateHandle += ListView_EndCreateHandle;
 
-////        private static void CreateRenderers()
-////        {
-////            ScrollBarRenderer scrollBarRenderer;
-////            ListViewRenderer listViewRenderer;
-////            HeaderRenderer headerRenderer;
-////            TreeViewRenderer treeViewRenderer;
+            CreateRenderers();
+        }
 
-////            _renderers = new ThemeRenderer[]
-////            {
-////                scrollBarRenderer = new ScrollBarRenderer(),
-////                listViewRenderer = new ListViewRenderer(),
-////                headerRenderer = new HeaderRenderer(),
-////                treeViewRenderer = new TreeViewRenderer(),
-////                new EditRenderer(),
-////                new SpinRenderer(),
-////                new ComboBoxRenderer(),
-////                new ButtonRenderer(),
-////                new TooltipRenderer(),
-////            };
+        private static void CreateRenderers()
+        {
+            ScrollBarRenderer scrollBarRenderer;
+            ListViewRenderer listViewRenderer;
+            HeaderRenderer headerRenderer;
+            TreeViewRenderer treeViewRenderer;
 
-////            var editorHandle = new ICSharpCode.TextEditor.TextEditorControl().Handle;
-////            var listViewHandle = new NativeListView().Handle;
-////            var treeViewHandle = new NativeTreeView().Handle;
-////            scrollBarRenderer.AddThemeData(editorHandle);
-////            scrollBarRenderer.AddThemeData(listViewHandle);
-////            headerRenderer.AddThemeData(listViewHandle);
-////            listViewRenderer.AddThemeData(listViewHandle);
-////            treeViewRenderer.AddThemeData(treeViewHandle);
-////        }
+            _renderers = new ThemeRenderer[]
+            {
+                scrollBarRenderer = new ScrollBarRenderer(),
+                listViewRenderer = new ListViewRenderer(),
+                headerRenderer = new HeaderRenderer(),
+                treeViewRenderer = new TreeViewRenderer(),
+                new EditRenderer(),
+                new SpinRenderer(),
+                new ComboBoxRenderer(),
+                new ButtonRenderer(),
+                new TooltipRenderer(),
+            };
 
-////        public static void Uninstall()
-////        {
-////            _getSysColorHook?.Dispose();
-////            _getSysColorBrushHook?.Dispose();
-////            _drawThemeBackgroundHook?.Dispose();
-////            _drawThemeBackgroundExHook?.Dispose();
-////            _getThemeColorHook?.Dispose();
-////            _drawThemeTextHook?.Dispose();
-////            _drawThemeTextExHook?.Dispose();
-////            _createWindowExHook?.Dispose();
+            var editorHandle = new ICSharpCode.TextEditor.TextEditorControl().Handle;
+            var listViewHandle = new NativeListView().Handle;
+            var treeViewHandle = new NativeTreeView().Handle;
+            scrollBarRenderer.AddThemeData(editorHandle);
+            scrollBarRenderer.AddThemeData(listViewHandle);
+            headerRenderer.AddThemeData(listViewHandle);
+            listViewRenderer.AddThemeData(listViewHandle);
+            treeViewRenderer.AddThemeData(treeViewHandle);
+        }
 
-////            if (_renderers != null)
-////            {
-////                foreach (var renderer in _renderers)
-////                {
-////                    renderer.Dispose();
-////                }
-////            }
+        public static void Uninstall()
+        {
+            _getSysColorHook?.Dispose();
+            _getSysColorBrushHook?.Dispose();
+            _drawThemeBackgroundHook?.Dispose();
+            _drawThemeBackgroundExHook?.Dispose();
+            _getThemeColorHook?.Dispose();
+            _drawThemeTextHook?.Dispose();
+            _drawThemeTextExHook?.Dispose();
+            _createWindowExHook?.Dispose();
 
-////            NativeListView.BeginCreateHandle -= ListView_BeginCreateHandle;
-////            NativeListView.EndCreateHandle -= ListView_EndCreateHandle;
+            if (_renderers != null)
+            {
+                foreach (var renderer in _renderers)
+                {
+                    renderer.Dispose();
+                }
+            }
 
-////            InitializingListViews.Clear();
-////        }
+            NativeListView.BeginCreateHandle -= ListView_BeginCreateHandle;
+            NativeListView.EndCreateHandle -= ListView_EndCreateHandle;
 
-////        private static (LocalHook hook, TDelegate original) InstallHook<TDelegate>(string dll, string method,
-////            TDelegate hookImpl)
-////            where TDelegate : Delegate
-////        {
-////            var addr = LocalHook.GetProcAddress(dll, method);
-////            var original = Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
-////            var hook = LocalHook.Create(addr, hookImpl, null);
+            InitializingListViews.Clear();
+        }
 
-////            try
-////            {
-////                hook.ThreadACL.SetExclusiveACL(new int[0]);
-////            }
-////            catch
-////            {
-////                hook.Dispose();
-////                throw;
-////            }
+        private static (LocalHook hook, TDelegate original) InstallHook<TDelegate>(string dll, string method,
+            TDelegate hookImpl)
+            where TDelegate : Delegate
+        {
+            var addr = LocalHook.GetProcAddress(dll, method);
+            var original = Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
+            var hook = LocalHook.Create(addr, hookImpl, null);
 
-////            return (hook, original);
-////        }
+            try
+            {
+                hook.ThreadACL.SetExclusiveACL(new int[0]);
+            }
+            catch
+            {
+                hook.Dispose();
+                throw;
+            }
 
-////        private static int GetSysColorHook(int nindex)
-////        {
-////            if (!BypassAnyHook)
-////            {
-////                var name = Win32ColorTranslator.GetKnownColor(nindex);
-////                var color = _theme.GetColor(name);
-////                if (color != Color.Empty)
-////                {
-////                    return ColorTranslator.ToWin32(color);
-////                }
-////            }
+            return (hook, original);
+        }
 
-////            return _getSysColorBypass(nindex);
-////        }
+        private static int GetSysColorHook(int nindex)
+        {
+            if (!BypassAnyHook)
+            {
+                var name = Win32ColorTranslator.GetKnownColor(nindex);
+                var color = _theme.GetColor(name);
+                if (color != Color.Empty)
+                {
+                    return ColorTranslator.ToWin32(color);
+                }
+            }
 
-////        private static IntPtr GetSysColorBrushHook(int nindex)
-////        {
-////            if (!BypassAnyHook)
-////            {
-////                var name = Win32ColorTranslator.GetKnownColor(nindex);
-////                var color = _theme.GetColor(name);
-////                if (color != Color.Empty)
-////                {
-////                    int colorref = ColorTranslator.ToWin32(color);
-////                    var hbrush = NativeMethods.CreateSolidBrush(colorref);
-////                    return hbrush;
-////                }
-////            }
+            return _getSysColorBypass(nindex);
+        }
 
-////            return _getSysColorBrushBypass(nindex);
-////        }
+        private static IntPtr GetSysColorBrushHook(int nindex)
+        {
+            if (!BypassAnyHook)
+            {
+                var name = Win32ColorTranslator.GetKnownColor(nindex);
+                var color = _theme.GetColor(name);
+                if (color != Color.Empty)
+                {
+                    int colorref = ColorTranslator.ToWin32(color);
+                    var hbrush = NativeMethods.CreateSolidBrush(colorref);
+                    return hbrush;
+                }
+            }
 
-////        private static int DrawThemeBackgroundHook(
-////            IntPtr htheme, IntPtr hdc,
-////            int partid, int stateid,
-////            NativeMethods.RECTCLS prect, NativeMethods.RECTCLS pcliprect)
-////        {
-////            if (!BypassThemeRenderers)
-////            {
-////                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
-////                if (renderer?.RenderBackground(hdc, partid, stateid, prect, pcliprect) == ThemeRenderer.Handled)
-////                {
-////                    return ThemeRenderer.Handled;
-////                }
-////            }
+            return _getSysColorBrushBypass(nindex);
+        }
 
-////            return _drawThemeBackgroundBypass(htheme, hdc, partid, stateid, prect, pcliprect);
-////        }
+        private static int DrawThemeBackgroundHook(
+            IntPtr htheme, IntPtr hdc,
+            int partid, int stateid,
+            NativeMethods.RECTCLS prect, NativeMethods.RECTCLS pcliprect)
+        {
+            if (!BypassThemeRenderers)
+            {
+                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
+                if (renderer?.RenderBackground(hdc, partid, stateid, prect, pcliprect) == ThemeRenderer.Handled)
+                {
+                    return ThemeRenderer.Handled;
+                }
+            }
 
-////        private static int DrawThemeBackgroundExHook(
-////            IntPtr htheme, IntPtr hdc,
-////            int partid, int stateid,
-////            NativeMethods.RECTCLS prect, ref NativeMethods.DTBGOPTS poptions)
-////        {
-////            if (!BypassThemeRenderers)
-////            {
-////                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
-////                if (renderer == null && InitializingListViews.Any(_ => _.CheckBoxes))
-////                {
-////                    renderer = _renderers.OfType<ListViewRenderer>().SingleOrDefault();
-////                }
+            return _drawThemeBackgroundBypass(htheme, hdc, partid, stateid, prect, pcliprect);
+        }
 
-////                if (renderer?.RenderBackgroundEx(htheme, hdc, partid, stateid, prect, ref poptions) == ThemeRenderer.Handled)
-////                {
-////                    return ThemeRenderer.Handled;
-////                }
-////            }
+        private static int DrawThemeBackgroundExHook(
+            IntPtr htheme, IntPtr hdc,
+            int partid, int stateid,
+            NativeMethods.RECTCLS prect, ref NativeMethods.DTBGOPTS poptions)
+        {
+            if (!BypassThemeRenderers)
+            {
+                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
+                if (renderer == null && InitializingListViews.Any(_ => _.CheckBoxes))
+                {
+                    renderer = _renderers.OfType<ListViewRenderer>().SingleOrDefault();
+                }
 
-////            return _drawThemeBackgroundExBypass(htheme, hdc, partid, stateid, prect, ref poptions);
-////        }
+                if (renderer?.RenderBackgroundEx(htheme, hdc, partid, stateid, prect, ref poptions) == ThemeRenderer.Handled)
+                {
+                    return ThemeRenderer.Handled;
+                }
+            }
 
-////        private static int GetThemeColorHook(IntPtr htheme, int ipartid, int istateid, int ipropid,
-////            out int pcolor)
-////        {
-////            if (!BypassThemeRenderers)
-////            {
-////                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
-////                if (renderer != null && renderer.GetThemeColor(ipartid, istateid, ipropid, out pcolor) == ThemeRenderer.Handled)
-////                {
-////                    return ThemeRenderer.Handled;
-////                }
-////            }
+            return _drawThemeBackgroundExBypass(htheme, hdc, partid, stateid, prect, ref poptions);
+        }
 
-////            return _getThemeColorBypass(htheme, ipartid, istateid, ipropid, out pcolor);
-////        }
+        private static int GetThemeColorHook(IntPtr htheme, int ipartid, int istateid, int ipropid,
+            out int pcolor)
+        {
+            if (!BypassThemeRenderers)
+            {
+                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
+                if (renderer != null && renderer.GetThemeColor(ipartid, istateid, ipropid, out pcolor) == ThemeRenderer.Handled)
+                {
+                    return ThemeRenderer.Handled;
+                }
+            }
 
-////        private static int DrawThemeTextHook(
-////            IntPtr htheme, IntPtr hdc,
-////            int partid, int stateid,
-////            string psztext, int cchtext,
-////            NativeMethods.DT dwtextflags, int dwtextflags2, IntPtr prect)
-////        {
-////            if (!BypassThemeRenderers)
-////            {
-////                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
-////                if (renderer != null && renderer.ForceUseRenderTextEx)
-////                {
-////                    NativeMethods.DTTOPTS poptions = new NativeMethods.DTTOPTS
-////                    {
-////                        dwSize = Marshal.SizeOf<NativeMethods.DTTOPTS>()
-////                    };
+            return _getThemeColorBypass(htheme, ipartid, istateid, ipropid, out pcolor);
+        }
 
-////                    return _drawThemeTextExBypass(
-////                        htheme, hdc,
-////                        partid, stateid,
-////                        psztext, cchtext, dwtextflags,
-////                        prect, ref poptions);
-////                }
-////            }
+        private static int DrawThemeTextHook(
+            IntPtr htheme, IntPtr hdc,
+            int partid, int stateid,
+            string psztext, int cchtext,
+            NativeMethods.DT dwtextflags, int dwtextflags2, IntPtr prect)
+        {
+            if (!BypassThemeRenderers)
+            {
+                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
+                if (renderer != null && renderer.ForceUseRenderTextEx)
+                {
+                    NativeMethods.DTTOPTS poptions = new NativeMethods.DTTOPTS
+                    {
+                        dwSize = Marshal.SizeOf<NativeMethods.DTTOPTS>()
+                    };
 
-////            return _drawThemeTextBypass(
-////                htheme, hdc,
-////                partid, stateid,
-////                psztext, cchtext,
-////                dwtextflags, dwtextflags2, prect);
-////        }
+                    return _drawThemeTextExBypass(
+                        htheme, hdc,
+                        partid, stateid,
+                        psztext, cchtext, dwtextflags,
+                        prect, ref poptions);
+                }
+            }
 
-////        private static int DrawThemeTextExHook(
-////            IntPtr htheme, IntPtr hdc,
-////            int partid, int stateid,
-////            string psztext, int cchtext,
-////            NativeMethods.DT dwtextflags,
-////            IntPtr prect, ref NativeMethods.DTTOPTS poptions)
-////        {
-////            if (!BypassThemeRenderers)
-////            {
-////                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
-////                if (renderer != null && renderer.RenderTextEx(
-////                    htheme, hdc,
-////                    partid, stateid,
-////                    psztext, cchtext,
-////                    dwtextflags,
-////                    prect, ref poptions) == ThemeRenderer.Handled)
-////                {
-////                    return ThemeRenderer.Handled;
-////                }
-////            }
+            return _drawThemeTextBypass(
+                htheme, hdc,
+                partid, stateid,
+                psztext, cchtext,
+                dwtextflags, dwtextflags2, prect);
+        }
 
-////            return _drawThemeTextExBypass(
-////                htheme, hdc,
-////                partid, stateid,
-////                psztext, cchtext,
-////                dwtextflags,
-////                prect, ref poptions);
-////        }
+        private static int DrawThemeTextExHook(
+            IntPtr htheme, IntPtr hdc,
+            int partid, int stateid,
+            string psztext, int cchtext,
+            NativeMethods.DT dwtextflags,
+            IntPtr prect, ref NativeMethods.DTTOPTS poptions)
+        {
+            if (!BypassThemeRenderers)
+            {
+                var renderer = _renderers.FirstOrDefault(_ => _.Supports(htheme));
+                if (renderer != null && renderer.RenderTextEx(
+                    htheme, hdc,
+                    partid, stateid,
+                    psztext, cchtext,
+                    dwtextflags,
+                    prect, ref poptions) == ThemeRenderer.Handled)
+                {
+                    return ThemeRenderer.Handled;
+                }
+            }
 
-////        private static IntPtr CreateWindowExHook(
-////            int dwexstyle, IntPtr lpclassname, IntPtr lpwindowname, int dwstyle,
-////            int x, int y, int nwidth, int nheight,
-////            IntPtr hwndparent, IntPtr hmenu, IntPtr hinstance, IntPtr lpparam)
-////        {
-////            var hwnd = _createWindowExBypass(
-////                dwexstyle, lpclassname, lpwindowname, dwstyle,
-////                x, y, nwidth, nheight,
-////                hwndparent, hmenu, hinstance, lpparam);
+            return _drawThemeTextExBypass(
+                htheme, hdc,
+                partid, stateid,
+                psztext, cchtext,
+                dwtextflags,
+                prect, ref poptions);
+        }
 
-////            WindowCreated?.Invoke(hwnd);
-////            return hwnd;
-////        }
+        private static IntPtr CreateWindowExHook(
+            int dwexstyle, IntPtr lpclassname, IntPtr lpwindowname, int dwstyle,
+            int x, int y, int nwidth, int nheight,
+            IntPtr hwndparent, IntPtr hmenu, IntPtr hinstance, IntPtr lpparam)
+        {
+            var hwnd = _createWindowExBypass(
+                dwexstyle, lpclassname, lpwindowname, dwstyle,
+                x, y, nwidth, nheight,
+                hwndparent, hmenu, hinstance, lpparam);
 
-////        private static void ListView_BeginCreateHandle(object sender, EventArgs args)
-////        {
-////            InitializingListViews.Add((NativeListView)sender);
-////        }
+            WindowCreated?.Invoke(hwnd);
+            return hwnd;
+        }
 
-////        private static void ListView_EndCreateHandle(object sender, EventArgs args)
-////        {
-////            InitializingListViews.Remove((NativeListView)sender);
-////        }
-////    }
-////}
+        private static void ListView_BeginCreateHandle(object sender, EventArgs args)
+        {
+            InitializingListViews.Add((NativeListView)sender);
+        }
+
+        private static void ListView_EndCreateHandle(object sender, EventArgs args)
+        {
+            InitializingListViews.Remove((NativeListView)sender);
+        }
+    }
+}
