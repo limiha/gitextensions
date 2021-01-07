@@ -1233,6 +1233,8 @@ namespace GitUI.Editor.RichTextBoxExtension
 
         public static void SetXHTMLText(this RichTextBox rtb, string xhtmlText)
         {
+            rtb.DetectUrls = false;
+
             rtb.Clear();
             var cs = new RTFCurrentState();
 
