@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using GitCommands;
-using GitUI;
 using JetBrains.Annotations;
-using ResourceManager.Properties;
 
 namespace ResourceManager
 {
@@ -20,18 +18,18 @@ namespace ResourceManager
     /// </remarks>
     public class GitExtensionsFormBase : Form, ITranslate
     {
-        private readonly GitExtensionsControlInitialiser _initialiser;
+        ////private readonly GitExtensionsControlInitialiser _initialiser;
 
         /// <summary>Creates a new <see cref="GitExtensionsFormBase"/> indicating position restore.</summary>
         public GitExtensionsFormBase()
         {
-            _initialiser = new GitExtensionsControlInitialiser(this);
+            ////_initialiser = new GitExtensionsControlInitialiser(this);
 
-            ShowInTaskbar = Application.OpenForms.Count <= 0;
-            Icon = Resources.GitExtensionsLogoIcon;
+            ////ShowInTaskbar = Application.OpenForms.Count <= 0;
+            ////Icon = Resources.GitExtensionsLogoIcon;
         }
 
-        protected bool IsDesignModeActive => _initialiser.IsDesignModeActive;
+        protected bool IsDesignModeActive => false; // _initialiser.IsDesignModeActive;
 
         #region Hotkeys
 
@@ -97,14 +95,14 @@ namespace ResourceManager
         /// </remarks>
         protected void InitializeComplete()
         {
-            _initialiser.InitializeComplete();
+            ////_initialiser.InitializeComplete();
 
-            AutoScaleMode = AppSettings.EnableAutoScale
-                ? AutoScaleMode.Dpi
-                : AutoScaleMode.None;
+            ////AutoScaleMode = AppSettings.EnableAutoScale
+            ////    ? AutoScaleMode.Dpi
+            ////    : AutoScaleMode.None;
 
-            this.AdjustForDpiScaling();
-            this.EnableRemoveWordHotkey();
+            ////this.AdjustForDpiScaling();
+            ////this.EnableRemoveWordHotkey();
         }
 
         #region Translation

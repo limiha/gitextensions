@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using GitCommands.Git.Commands;
 using GitExtUtils.GitUI.Theming;
-using GitUI.CommandsDialogs;
 using GitUI.CommandsDialogs.BrowseDialog;
 using GitUI.HelperDialogs;
 using ResourceManager;
@@ -223,11 +222,6 @@ namespace GitUI.UserControls
             switch (_action)
             {
                 case GitAction.Bisect:
-                    if (!(Form is FormBrowse))
-                    {
-                        return;
-                    }
-
                     using (var frm = new FormBisect(Form.RevisionGridControl))
                     {
                         frm.ShowDialog(this);
