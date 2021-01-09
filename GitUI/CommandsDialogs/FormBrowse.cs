@@ -70,8 +70,6 @@ namespace GitUI.CommandsDialogs
             CommitInfo = 8
         }
 
-        public RevisionGridControl RevisionGridControl { get => RevisionGrid; }
-
         [Obsolete("For VS designer and translation test only. Do not remove.")]
         private FormBrowse()
         {
@@ -368,7 +366,6 @@ namespace GitUI.CommandsDialogs
 
         private void TagToolStripMenuItemClick(object sender, EventArgs e)
         {
-            var revision = RevisionGrid.LatestSelectedRevision;
         }
 
         private void KGitToolStripMenuItemClick(object sender, EventArgs e)
@@ -398,19 +395,6 @@ namespace GitUI.CommandsDialogs
 
         private void ArchiveToolStripMenuItemClick(object sender, EventArgs e)
         {
-            var revisions = RevisionGrid.GetSelectedRevisions();
-            if (revisions.Count < 1 || revisions.Count > 2)
-            {
-                MessageBoxes.SelectOnlyOneOrTwoRevisions(this);
-                return;
-            }
-
-            GitRevision mainRevision = revisions.First();
-            GitRevision diffRevision = null;
-            if (revisions.Count == 2)
-            {
-                diffRevision = revisions.Last();
-            }
         }
 
         private void EditMailMapToolStripMenuItemClick(object sender, EventArgs e)
@@ -627,7 +611,6 @@ namespace GitUI.CommandsDialogs
         {
             var module = e.GitModule;
             HideVariableMainMenuItems();
-            RevisionGrid.InvalidateCount();
         }
 
         private void TranslateToolStripMenuItemClick(object sender, EventArgs e)
@@ -689,10 +672,6 @@ namespace GitUI.CommandsDialogs
 
         private void BisectClick(object sender, EventArgs e)
         {
-            using (var frm = new FormBisect(RevisionGrid))
-            {
-                frm.ShowDialog(this);
-            }
         }
 
         private void CurrentBranchDropDownOpening(object sender, EventArgs e)
