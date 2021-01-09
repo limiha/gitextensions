@@ -6,12 +6,10 @@ using System.Text;
 using System.Windows.Forms;
 using GitCommands;
 using GitCommands.Git;
-using GitCommands.Git.Commands;
 using GitCommands.UserRepositoryHistory;
 using GitExtUtils;
 using GitUI.CommandsDialogs.BrowseDialog;
 using GitUI.Infrastructure.Telemetry;
-using GitUI.Properties;
 using GitUI.Shells;
 using GitUIPluginInterfaces;
 using JetBrains.Annotations;
@@ -118,24 +116,6 @@ namespace GitUI.CommandsDialogs
 
         #endregion
 
-        /// <summary>
-        /// to avoid showing menu items that should not be there during
-        /// the transition from dashboard to repo browser and vice versa
-        ///
-        /// and reset hotkeys that are shared between mutual exclusive menu items
-        /// </summary>
-        private void HideVariableMainMenuItems()
-        {
-            dashboardToolStripMenuItem.Visible = false;
-            repositoryToolStripMenuItem.Visible = false;
-            commandsToolStripMenuItem.Visible = false;
-            pluginsToolStripMenuItem.Visible = false;
-            refreshToolStripMenuItem.ShortcutKeys = Keys.None;
-            refreshDashboardToolStripMenuItem.ShortcutKeys = Keys.None;
-            _repositoryHostsToolStripMenuItem.Visible = false;
-            mainMenuStrip.Refresh();
-        }
-
         #region Working directory combo box
 
         /// <summary>Updates the text shown on the combo button itself.</summary>
@@ -241,10 +221,6 @@ namespace GitUI.CommandsDialogs
             }
         }
 
-        private void CheckoutToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
         private void CloneToolStripMenuItemClick(object sender, EventArgs e)
         {
         }
@@ -267,22 +243,6 @@ namespace GitUI.CommandsDialogs
         }
 
         private void RefreshDashboardToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void AboutToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            using (var frm = new FormAbout())
-            {
-                frm.ShowDialog(this);
-            }
-        }
-
-        private void PatchToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void ApplyPatchToolStripMenuItemClick(object sender, EventArgs e)
         {
         }
 
@@ -310,32 +270,7 @@ namespace GitUI.CommandsDialogs
             }
         }
 
-        private void GitGuiToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void FormatPatchToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void GitcommandLogToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            FormGitCommandLog.ShowOrActivate(this);
-        }
-
         private void CheckoutBranchToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void StashToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void ResetToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void RunMergetoolToolStripMenuItemClick(object sender, EventArgs e)
         {
         }
 
@@ -344,40 +279,8 @@ namespace GitUI.CommandsDialogs
             branchSelect.ShowDropDown();
         }
 
-        private void DeleteBranchToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void DeleteTagToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void CherryPickToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void MergeBranchToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
         private void OnShowSettingsClick(object sender, EventArgs e)
         {
-        }
-
-        private void TagToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void KGitToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void DonateToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            using (var frm = new FormDonate())
-            {
-                frm.ShowDialog(this);
-            }
         }
 
         private static void SaveApplicationSettings()
@@ -385,73 +288,9 @@ namespace GitUI.CommandsDialogs
             AppSettings.SaveSettings();
         }
 
-        private void EditGitignoreToolStripMenuItem1Click(object sender, EventArgs e)
-        {
-        }
-
-        private void EditGitInfoExcludeToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void ArchiveToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void EditMailMapToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void EditLocalGitConfigToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void CompressGitDatabaseToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void recoverLostObjectsToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void ManageRemoteRepositoriesToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void RebaseToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void StartAuthenticationAgentToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void GenerateOrImportKeyToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void ChangelogToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            using (var frm = new FormChangeLog())
-            {
-                frm.ShowDialog(this);
-            }
-        }
-
         private void ToolStripButtonPushClick(object sender, EventArgs e)
         {
             PushToolStripMenuItemClick(sender, e);
-        }
-
-        private void ManageSubmodulesToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void UpdateAllSubmodulesToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void SynchronizeAllSubmodulesToolStripMenuItemClick(object sender, EventArgs e)
-        {
         }
 
         private void ToolStripSplitStashButtonClick(object sender, EventArgs e)
@@ -507,29 +346,6 @@ namespace GitUI.CommandsDialogs
 
                 await this.SwitchToMainThreadAsync();
             });
-        }
-
-        private void PluginSettingsToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void RepoSettingsToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void CloseToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            SetWorkingDir("");
-        }
-
-        private void UserManualToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            // Point to the default documentation, will work also if the old doc version is removed
-            OsShellUtil.OpenUrlInDefaultBrowser(@"https://git-extensions-documentation.readthedocs.org");
-        }
-
-        private void CleanupToolStripMenuItemClick(object sender, EventArgs e)
-        {
         }
 
         private void PopulateFavouriteRepositoriesMenu(ToolStripDropDownItem container)
@@ -610,23 +426,9 @@ namespace GitUI.CommandsDialogs
         private void SetGitModule(object sender, GitModuleEventArgs e)
         {
             var module = e.GitModule;
-            HideVariableMainMenuItems();
-        }
-
-        private void TranslateToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            OsShellUtil.OpenUrlInDefaultBrowser(@"https://github.com/gitextensions/gitextensions/wiki/Translations");
         }
 
         private void FileExplorerToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void CreateBranchToolStripMenuItemClick(object sender, EventArgs e)
-        {
-        }
-
-        private void editGitAttributesToolStripMenuItem_Click(object sender, EventArgs e)
         {
         }
 
@@ -659,62 +461,18 @@ namespace GitUI.CommandsDialogs
             ClipboardUtil.TrySetText(fileNames.ToString());
         }
 
-        private void deleteIndexLockToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-            }
-            catch (FileDeleteException ex)
-            {
-                MessageBox.Show(this, $@"{_indexLockCantDelete.Text}: {ex.FileName}{Environment.NewLine}{ex.Message}", Strings.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void BisectClick(object sender, EventArgs e)
-        {
-        }
-
         private void CurrentBranchDropDownOpening(object sender, EventArgs e)
         {
             branchSelect.DropDownItems.Clear();
 
-            AddCheckoutBranchMenuItem();
             branchSelect.DropDownItems.Add(new ToolStripSeparator());
             AddBranchesMenuItems();
 
             PreventToolStripSplitButtonClosing(sender as ToolStripSplitButton);
 
-            void AddCheckoutBranchMenuItem()
-            {
-                var checkoutBranchItem = new ToolStripMenuItem(checkoutBranchToolStripMenuItem.Text, Images.BranchCheckout)
-                {
-                    ShortcutKeys = checkoutBranchToolStripMenuItem.ShortcutKeys,
-                    ShortcutKeyDisplayString = checkoutBranchToolStripMenuItem.ShortcutKeyDisplayString
-                };
-
-                branchSelect.DropDownItems.Add(checkoutBranchItem);
-                checkoutBranchItem.Click += CheckoutBranchToolStripMenuItemClick;
-            }
-
             void AddBranchesMenuItems()
             {
             }
-        }
-
-        private void _forkCloneMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void _viewPullRequestsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void _createPullRequestToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void _addUpstreamRemoteToolStripMenuItem_Click(object sender, EventArgs e)
-        {
         }
 
         #region Hotkey commands
@@ -784,12 +542,6 @@ namespace GitUI.CommandsDialogs
 
                 FormBrowseUtil.ShowFileOrParentFolderInFileExplorer(filePath);
             }
-        }
-
-        private void PullToolStripMenuItemClick(object sender, EventArgs e)
-        {
-            // "Pull/Fetch..." menu item always opens the dialog
-            DoPull(pullAction: AppSettings.FormPullAction, isSilent: false);
         }
 
         private void ToolStripButtonPullClick(object sender, EventArgs e)
@@ -880,29 +632,9 @@ namespace GitUI.CommandsDialogs
         {
         }
 
-        private void reportAnIssueToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            UserEnvironmentInformation.CopyInformation();
-            OsShellUtil.OpenUrlInDefaultBrowser(@"https://github.com/gitextensions/gitextensions/issues");
-        }
-
-        private void checkForUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var updateForm = new FormUpdates(AppSettings.AppVersion);
-            updateForm.SearchForUpdatesAndShow(Owner, true);
-        }
-
         private void toolStripButtonPull_DropDownOpened(object sender, EventArgs e)
         {
             PreventToolStripSplitButtonClosing(sender as ToolStripSplitButton);
-        }
-
-        private void menuitemSparseWorkingCopy_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void toolStripMenuItemReflog_Click(object sender, EventArgs e)
-        {
         }
 
         #region Layout management
@@ -980,14 +712,6 @@ namespace GitUI.CommandsDialogs
 
         #endregion
 
-        private void manageWorktreeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void createWorktreeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
         private void toolStripSplitStash_DropDownOpened(object sender, EventArgs e)
         {
             PreventToolStripSplitButtonClosing(sender as ToolStripSplitButton);
@@ -1001,15 +725,6 @@ namespace GitUI.CommandsDialogs
             }
 
             toolStripBranchFilterComboBox.DroppedDown = true;
-        }
-
-        private void undoLastCommitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (AppSettings.DontConfirmUndoLastCommit || MessageBox.Show(this, _undoLastCommitText.Text, _undoLastCommitCaption.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-            {
-                var args = GitCommandHelpers.ResetCmd(ResetMode.Soft, "HEAD~1");
-                refreshToolStripMenuItem.PerformClick();
-            }
         }
 
         internal TestAccessor GetTestAccessor()
@@ -1042,15 +757,6 @@ namespace GitUI.CommandsDialogs
             {
                 e.Effect = DragDropEffects.Move;
             }
-        }
-
-        private void TsmiTelemetryEnabled_Click(object sender, EventArgs e)
-        {
-        }
-
-        private void HelpToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            tsmiTelemetryEnabled.Checked = AppSettings.TelemetryEnabled ?? false;
         }
     }
 }
