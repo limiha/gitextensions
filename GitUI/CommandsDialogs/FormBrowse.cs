@@ -22,7 +22,6 @@ using GitCommands.Utils;
 using GitExtUtils;
 using GitExtUtils.GitUI;
 using GitExtUtils.GitUI.Theming;
-using GitUI.BranchTreePanel;
 using GitUI.CommandsDialogs.BrowseDialog;
 using GitUI.CommandsDialogs.BrowseDialog.DashboardControl;
 using GitUI.CommandsDialogs.WorktreeDialog;
@@ -85,22 +84,15 @@ namespace GitUI.CommandsDialogs
         private readonly SplitterManager _splitterManager = new SplitterManager(new AppSettingsPath("FormBrowse"));
         [NotNull]
         private readonly GitStatusMonitor _gitStatusMonitor;
-        private readonly FilterRevisionsHelper _filterRevisionsHelper;
-        private readonly FilterBranchHelper _filterBranchHelper;
         private readonly FormBrowseMenus _formBrowseMenus;
         private readonly IFormBrowseController _controller;
         private readonly ICommitDataManager _commitDataManager;
         private readonly IAppTitleGenerator _appTitleGenerator;
-        [CanBeNull] private readonly IAheadBehindDataProvider _aheadBehindDataProvider;
         private readonly WindowsJumpListManager _windowsJumpListManager;
         private readonly ISubmoduleStatusProvider _submoduleStatusProvider;
         private readonly FormBrowseDiagnosticsReporter _formBrowseDiagnosticsReporter;
-        [CanBeNull] private BuildReportTabPageExtension _buildReportTabPageExtension;
         private readonly ShellProvider _shellProvider = new ShellProvider();
-        private ConEmuControl _terminal;
         private Dashboard _dashboard;
-
-        [CanBeNull] private TabPage _consoleTabPage;
 
         [Flags]
         private enum UpdateTargets
@@ -152,31 +144,6 @@ namespace GitUI.CommandsDialogs
             MainSplitContainer.Visible = false;
             MainSplitContainer.SplitterDistance = DpiUtil.Scale(260);
 
-            // set tab page images
-            CommitInfoTabControl.ImageList = new ImageList
-            {
-                ColorDepth = ColorDepth.Depth32Bit,
-                ImageSize = DpiUtil.Scale(new Size(16, 16)),
-                Images =
-                {
-                    { nameof(Images.CommitSummary), Images.CommitSummary },
-                    { nameof(Images.FileTree), Images.FileTree },
-                    { nameof(Images.Diff), Images.Diff },
-                    { nameof(Images.Key), Images.Key },
-                    { nameof(Images.Console), Images.Console }
-                }
-            };
-
-            CommitInfoTabPage.ImageKey = nameof(Images.CommitSummary);
-            DiffTabPage.ImageKey = nameof(Images.Diff);
-            TreeTabPage.ImageKey = nameof(Images.FileTree);
-            GpgInfoTabPage.ImageKey = nameof(Images.Key);
-
-            if (!AppSettings.ShowGpgInformation.Value)
-            {
-                CommitInfoTabControl.RemoveIfExists(GpgInfoTabPage);
-            }
-
             ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
             {
                 await TaskScheduler.Default;
@@ -184,14 +151,6 @@ namespace GitUI.CommandsDialogs
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 RegisterPlugins();
             }).FileAndForget();
-
-            _filterRevisionsHelper = new FilterRevisionsHelper(toolStripRevisionFilterTextBox, toolStripRevisionFilterDropDownButton, RevisionGrid, toolStripRevisionFilterLabel, ShowFirstParent, form: this);
-            _filterBranchHelper = new FilterBranchHelper(toolStripBranchFilterComboBox, toolStripBranchFilterDropDownButton, RevisionGrid);
-            _aheadBehindDataProvider = GitVersion.Current.SupportAheadBehindData ? new AheadBehindDataProvider(() => Module.GitExecutable) : null;
-
-            repoObjectsTree.Initialize(_aheadBehindDataProvider, _filterBranchHelper, RevisionGrid, RevisionGrid, RevisionGrid);
-            toolStripBranchFilterComboBox.DropDown += toolStripBranches_DropDown_ResizeDropDownWidth;
-            revisionDiff.Bind(RevisionGrid, fileTree);
 
             var repositoryDescriptionProvider = new RepositoryDescriptionProvider(new GitDirectoryResolver());
             _appTitleGenerator = new AppTitleGenerator(repositoryDescriptionProvider);
@@ -226,10 +185,7 @@ namespace GitUI.CommandsDialogs
                 //      b) filter on specific branch
                 bool isFiltering = !AppSettings.ShowReflogReferences
                                 && (AppSettings.ShowCurrentBranchOnly || AppSettings.BranchFilterEnabled);
-                repoObjectsTree.ToggleFilterMode(isFiltering);
             };
-
-            _filterRevisionsHelper.SetFilter(filter);
 
             HotkeysEnabled = true;
             Hotkeys = HotkeySettingsManager.LoadHotkeys(HotkeySettingsName);
@@ -308,26 +264,16 @@ namespace GitUI.CommandsDialogs
 
             void WorkaroundToolbarLocationBug()
             {
-                // Layout engine bug (?) which may change the order of toolbars
-                // if the 1st one becomes longer than the 2nd toolbar's Location.X
-                // the layout engine will be place the 2nd toolbar first
-                toolPanel.TopToolStripPanel.Controls.Clear();
-                toolPanel.TopToolStripPanel.Controls.Add(ToolStripFilters);
-                toolPanel.TopToolStripPanel.Controls.Add(ToolStripMain);
+                ////// Layout engine bug (?) which may change the order of toolbars
+                ////// if the 1st one becomes longer than the 2nd toolbar's Location.X
+                ////// the layout engine will be place the 2nd toolbar first
+                ////toolPanel.TopToolStripPanel.Controls.Clear();
+                ////toolPanel.TopToolStripPanel.Controls.Add(ToolStripFilters);
+                ////toolPanel.TopToolStripPanel.Controls.Add(ToolStripMain);
             }
 
             void FocusRevisionDiffFileStatusList()
             {
-                if (!revisionDiff.Visible)
-                {
-                    CommitInfoTabControl.SelectedTab = DiffTabPage;
-                }
-
-                if (revisionDiff.Visible)
-                {
-                    // force focus of file list
-                    revisionDiff.SwitchFocus(alreadyContainedFocus: false);
-                }
             }
 
             void ManageWorktreeSupport()
@@ -595,8 +541,6 @@ namespace GitUI.CommandsDialogs
                 // ReSharper disable ConstantConditionalAccessQualifier - these can be null if run from under the TranslatioApp
 
                 _formBrowseMenus?.Dispose();
-                _filterRevisionsHelper?.Dispose();
-                _filterBranchHelper?.Dispose();
                 components?.Dispose();
                 _gitStatusMonitor?.Dispose();
                 _windowsJumpListManager?.Dispose();
@@ -609,11 +553,6 @@ namespace GitUI.CommandsDialogs
 
         protected override void OnApplicationActivated()
         {
-            if (AppSettings.RefreshArtificialCommitOnApplicationActivated && CommitInfoTabControl.SelectedTab == DiffTabPage)
-            {
-                revisionDiff.RefreshArtificial();
-            }
-
             base.OnApplicationActivated();
         }
 
@@ -630,28 +569,9 @@ namespace GitUI.CommandsDialogs
                 return;
             }
 
-            RevisionGrid.Load();
-            _filterBranchHelper.InitToolStripBranchFilter();
-
-            ActiveControl = RevisionGrid;
-            RevisionGrid.IndexWatcher.Reset();
-
-            RevisionGrid.IndexWatcher.Changed += (_, args) =>
-            {
-                bool indexChanged = args.IsIndexChanged;
-                this.InvokeAsync(
-                        () =>
-                        {
-                            RefreshButton.Image = indexChanged && AppSettings.UseFastChecks && Module.IsValidGitWorkingDir()
-                                ? Images.ReloadRevisionsDirty
-                                : Images.ReloadRevisions;
-                        })
-                    .FileAndForget();
-            };
             UpdateSubmodulesStructure();
             UpdateStashCount();
 
-            toolStripButtonPush.Initialize(_aheadBehindDataProvider);
             toolStripButtonPush.DisplayAheadBehindInformation(Module.GetSelectedBranch());
 
             _formBrowseDiagnosticsReporter.Report();
@@ -706,15 +626,11 @@ namespace GitUI.CommandsDialogs
         public override void AddTranslationItems(ITranslation translation)
         {
             base.AddTranslationItems(translation);
-            TranslationUtils.AddTranslationItemsFromFields(Name, _filterRevisionsHelper, translation);
-            TranslationUtils.AddTranslationItemsFromFields(Name, _filterBranchHelper, translation);
         }
 
         public override void TranslateItems(ITranslation translation)
         {
             base.TranslateItems(translation);
-            TranslationUtils.TranslateItemsFromFields(Name, _filterRevisionsHelper, translation);
-            TranslationUtils.TranslateItemsFromFields(Name, _filterBranchHelper, translation);
         }
 
         public override void CancelButtonClick(object sender, EventArgs e)
@@ -723,15 +639,12 @@ namespace GitUI.CommandsDialogs
             if (RevisionGrid.FilterIsApplied(false))
             {
                 // Clear filter
-                _filterRevisionsHelper.SetFilter(string.Empty);
             }
 
             // If a branch filter is applied by text or using the menus "Show current branch only"
             else if (RevisionGrid.FilterIsApplied(true) || AppSettings.BranchFilterEnabled)
             {
                 // Clear branch filter
-                _filterBranchHelper.SetBranchFilter(string.Empty, true);
-
                 // Execute the "Show all branches" menu option
                 RevisionGrid.ShowAllBranches();
             }
@@ -747,7 +660,6 @@ namespace GitUI.CommandsDialogs
             this.InvokeAsync(RefreshRevisions).FileAndForget();
             UpdateSubmodulesStructure();
             UpdateStashCount();
-            revisionDiff.UICommands_PostRepositoryChanged(sender, e);
         }
 
         private void RefreshRevisions()
@@ -762,7 +674,6 @@ namespace GitUI.CommandsDialogs
 
             if (_dashboard == null || !_dashboard.Visible)
             {
-                revisionDiff.RefreshArtificial();
                 RevisionGrid.ForceRefreshRevisions();
                 InternalInitialize(true);
             }
@@ -789,7 +700,6 @@ namespace GitUI.CommandsDialogs
 
             ThreadHelper.JoinableTaskFactory.RunAsync(() => FillGpgInfoAsync(selectedRevision));
             FillBuildReport(selectedRevision);
-            repoObjectsTree.SelectionChanged(selectedRevisions);
         }
 
         #region IBrowseRepo
@@ -979,7 +889,6 @@ namespace GitUI.CommandsDialogs
 
                 branchSelect.Text = validBrowseDir ? Module.GetSelectedBranch() : "";
                 toolStripButtonLevelUp.Enabled = hasWorkingDir && !bareRepository;
-                CommitInfoTabControl.Visible = validBrowseDir;
                 fileExplorerToolStripMenuItem.Enabled = validBrowseDir;
                 manageRemoteRepositoriesToolStripMenuItem1.Enabled = validBrowseDir;
                 branchSelect.Enabled = validBrowseDir;
@@ -1009,8 +918,6 @@ namespace GitUI.CommandsDialogs
                 toolStripSplitStash.Enabled = validBrowseDir && !bareRepository;
                 _createPullRequestsToolStripMenuItem.Enabled = validBrowseDir;
                 _viewPullRequestsToolStripMenuItem.Enabled = validBrowseDir;
-
-                _filterBranchHelper.InitToolStripBranchFilter();
 
                 if (repositoryToolStripMenuItem.Visible)
                 {
@@ -1155,7 +1062,6 @@ namespace GitUI.CommandsDialogs
         private void OnActivate()
         {
             // check if we are in the middle of an action (merge/rebase/bisect)
-            RevisionHeader.RefreshGitAction();
         }
 
         private void UpdateStashCount()
@@ -1284,91 +1190,35 @@ namespace GitUI.CommandsDialogs
 
             if (showFileTreeTab)
             {
-                if (TreeTabPage.Parent == null)
-                {
-                    var index = CommitInfoTabControl.TabPages.IndexOf(DiffTabPage);
-                    Debug.Assert(index != -1, "TabControl should contain diff tab page");
-                    CommitInfoTabControl.TabPages.Insert(index + 1, TreeTabPage);
-                }
             }
             else
             {
-                TreeTabPage.Parent = null;
-            }
-
-            if (CommitInfoTabControl.SelectedTab != TreeTabPage || _selectedRevisionUpdatedTargets.HasFlag(UpdateTargets.FileTree))
-            {
-                return;
             }
 
             _selectedRevisionUpdatedTargets |= UpdateTargets.FileTree;
-            fileTree.LoadRevision(revision);
         }
 
         private void FillDiff(IReadOnlyList<GitRevision> revisions)
         {
-            if (CommitInfoTabControl.SelectedTab != DiffTabPage)
-            {
-                return;
-            }
-
             if (_selectedRevisionUpdatedTargets.HasFlag(UpdateTargets.DiffList))
             {
                 return;
             }
 
             _selectedRevisionUpdatedTargets |= UpdateTargets.DiffList;
-            revisionDiff.DisplayDiffTab(revisions);
         }
 
         private void FillCommitInfo(GitRevision revision)
         {
-            if (_selectedRevisionUpdatedTargets.HasFlag(UpdateTargets.CommitInfo))
-            {
-                return;
-            }
-
-            if (AppSettings.CommitInfoPosition == CommitInfoPosition.BelowList && CommitInfoTabControl.SelectedTab != CommitInfoTabPage)
-            {
-                return;
-            }
-
-            _selectedRevisionUpdatedTargets |= UpdateTargets.CommitInfo;
-
-            if (revision == null)
-            {
-                return;
-            }
-
-            var children = RevisionGrid.GetRevisionChildren(revision.ObjectId);
-            RevisionInfo.SetRevisionWithChildren(revision, children);
         }
 
-        private async Task FillGpgInfoAsync(GitRevision revision)
+        private Task FillGpgInfoAsync(GitRevision revision)
         {
-            if (!AppSettings.ShowGpgInformation.Value || CommitInfoTabControl.SelectedTab != GpgInfoTabPage)
-            {
-                return;
-            }
-
-            if (revision == null)
-            {
-                return;
-            }
-
-            var info = await _controller.LoadGpgInfoAsync(revision);
-            revisionGpgInfo1.DisplayGpgInfo(info);
+            return Task.CompletedTask;
         }
 
         private void FillBuildReport(GitRevision revision)
         {
-            if (_buildReportTabPageExtension == null)
-            {
-                _buildReportTabPageExtension = new BuildReportTabPageExtension(() => Module, CommitInfoTabControl, _buildReportTabCaption.Text);
-            }
-
-            // Note: FillBuildReport will check if tab is visible and revision is OK
-            _buildReportTabPageExtension.FillBuildReport(revision);
         }
 
         private void OpenToolStripMenuItemClick(object sender, EventArgs e)
@@ -1487,7 +1337,6 @@ namespace GitUI.CommandsDialogs
         private void ResetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UICommands.StartResetChangesDialog(this);
-            revisionDiff.RefreshArtificial();
         }
 
         private void RunMergetoolToolStripMenuItemClick(object sender, EventArgs e)
@@ -1542,9 +1391,6 @@ namespace GitUI.CommandsDialogs
             Hotkeys = HotkeySettingsManager.LoadHotkeys(HotkeySettingsName);
             RevisionGrid.ReloadHotkeys();
             RevisionGrid.ReloadTranslation();
-            fileTree.ReloadHotkeys();
-            revisionDiff.ReloadHotkeys();
-            revisionDiff.ReloadCustomDifftools();
 
             _dashboard?.RefreshContent();
 
@@ -1683,11 +1529,6 @@ namespace GitUI.CommandsDialogs
         {
             RefreshSelection();
             FillTerminalTab();
-            if (CommitInfoTabControl.SelectedTab == DiffTabPage)
-            {
-                // workaround to avoid focusing the "filter files" combobox
-                revisionDiff.SwitchFocus(alreadyContainedFocus: false);
-            }
         }
 
         private void ChangelogToolStripMenuItemClick(object sender, EventArgs e)
@@ -1931,7 +1772,6 @@ namespace GitUI.CommandsDialogs
             RevisionGrid.InvalidateCount();
             _gitStatusMonitor.InvalidateGitWorkingDirectoryStatus();
             _submoduleStatusProvider.Init();
-            _filterBranchHelper.SetBranchFilter(string.Empty, refresh: false);
 
             UICommands = new GitUICommands(module);
             if (Module.IsValidGitWorkingDir())
@@ -1953,7 +1793,6 @@ namespace GitUI.CommandsDialogs
 #endif
 
                 HideDashboard();
-                RevisionInfo.SetRevisionWithChildren(null, Array.Empty<ObjectId>());
                 UICommands.RepoChangedNotifier.Notify();
                 RevisionGrid.IndexWatcher.Reset();
             }
@@ -2223,12 +2062,6 @@ namespace GitUI.CommandsDialogs
 
         private void FindFileInSelectedCommit()
         {
-            CommitInfoTabControl.SelectedTab = TreeTabPage;
-
-            AppSettings.ShowSplitViewLayout = true;
-            RefreshSplitViewLayout();
-
-            fileTree.InvokeFindFileDialog();
         }
 
         private void QuickFetch()
@@ -2242,159 +2075,6 @@ namespace GitUI.CommandsDialogs
 
             ScriptManager.RunEventScripts(this, ScriptEvent.AfterFetch);
             UICommands.RepoChangedNotifier.Notify();
-        }
-
-        protected override CommandStatus ExecuteCommand(int cmd)
-        {
-            switch ((Command)cmd)
-            {
-                case Command.GitBash: userShell.PerformButtonClick(); break;
-                case Command.GitGui: Module.RunGui(); break;
-                case Command.GitGitK: Module.RunGitK(); break;
-                case Command.FocusBranchTree: FocusBranchTree(); break;
-                case Command.FocusRevisionGrid: RevisionGrid.Focus(); break;
-                case Command.FocusCommitInfo: FocusCommitInfo(); break;
-                case Command.FocusDiff: FocusTabOf(revisionDiff, (c, alreadyContainedFocus) => c.SwitchFocus(alreadyContainedFocus)); break;
-                case Command.FocusFileTree: FocusTabOf(fileTree, (c, alreadyContainedFocus) => c.SwitchFocus(alreadyContainedFocus)); break;
-                case Command.FocusGpgInfo when AppSettings.ShowGpgInformation.Value: FocusTabOf(revisionGpgInfo1, (c, alreadyContainedFocus) => c.Focus()); break;
-                case Command.FocusGitConsole: FocusGitConsole(); break;
-                case Command.FocusBuildServerStatus: FocusTabOf(_buildReportTabPageExtension.Control, (c, alreadyContainedFocus) => c.Focus()); break;
-                case Command.FocusNextTab: FocusNextTab(); break;
-                case Command.FocusPrevTab: FocusNextTab(forward: false); break;
-                case Command.FocusFilter: FocusFilter(); break;
-                case Command.Commit: CommitToolStripMenuItemClick(null, null); break;
-                case Command.AddNotes: AddNotes(); break;
-                case Command.FindFileInSelectedCommit: FindFileInSelectedCommit(); break;
-                case Command.CheckoutBranch: CheckoutBranchToolStripMenuItemClick(null, null); break;
-                case Command.QuickFetch: QuickFetch(); break;
-                case Command.QuickPull: mergeToolStripMenuItem_Click(null, null); break;
-                case Command.QuickPush: UICommands.StartPushDialog(this, true); break;
-                case Command.CloseRepository: CloseToolStripMenuItemClick(null, null); break;
-                case Command.Stash: UICommands.StashSave(this, AppSettings.IncludeUntrackedFilesInManualStash); break;
-                case Command.StashPop: UICommands.StashPop(this); break;
-                case Command.OpenCommitsWithDifftool: RevisionGrid.DiffSelectedCommitsWithDifftool(); break;
-                case Command.OpenWithDifftool: OpenWithDifftool(); break;
-                case Command.OpenWithDifftoolFirstToLocal: OpenWithDifftoolFirstToLocal(); break;
-                case Command.OpenWithDifftoolSelectedToLocal: OpenWithDifftoolSelectedToLocal(); break;
-                case Command.OpenSettings: OnShowSettingsClick(null, null); break;
-                case Command.ToggleBranchTreePanel: toggleBranchTreePanel_Click(null, null); break;
-                case Command.EditFile: EditFile(); break;
-                case Command.OpenAsTempFile when fileTree.Visible: fileTree.ExecuteCommand(RevisionFileTreeControl.Command.OpenAsTempFile); break;
-                case Command.OpenAsTempFileWith when fileTree.Visible: fileTree.ExecuteCommand(RevisionFileTreeControl.Command.OpenAsTempFileWith); break;
-                case Command.GoToSuperproject: toolStripButtonLevelUp_ButtonClick(null, null); break;
-                case Command.GoToSubmodule: toolStripButtonLevelUp.ShowDropDown(); break;
-                case Command.ToggleBetweenArtificialAndHeadCommits: RevisionGrid?.ExecuteCommand(RevisionGridControl.Command.ToggleBetweenArtificialAndHeadCommits); break;
-                case Command.GoToChild: RestoreFileStatusListFocus(() => RevisionGrid?.ExecuteCommand(RevisionGridControl.Command.GoToChild)); break;
-                case Command.GoToParent: RestoreFileStatusListFocus(() => RevisionGrid?.ExecuteCommand(RevisionGridControl.Command.GoToParent)); break;
-                default: return base.ExecuteCommand(cmd);
-            }
-
-            return true;
-
-            void FocusBranchTree()
-            {
-                if (!MainSplitContainer.Panel1Collapsed)
-                {
-                    repoObjectsTree.Focus();
-                }
-            }
-
-            void FocusCommitInfo()
-            {
-                if (AppSettings.CommitInfoPosition == CommitInfoPosition.BelowList)
-                {
-                    CommitInfoTabControl.SelectedTab = CommitInfoTabPage;
-                }
-
-                RevisionInfo.Focus();
-            }
-
-            void FocusTabOf<T>(T control, Action<T, bool> switchFocus) where T : Control
-            {
-                if (control != null)
-                {
-                    var tabPage = control.Parent as TabPage;
-                    if (CommitInfoTabControl.TabPages.IndexOf(tabPage) >= 0)
-                    {
-                        bool alreadyContainedFocus = control.ContainsFocus;
-
-                        if (CommitInfoTabControl.SelectedTab != tabPage)
-                        {
-                            CommitInfoTabControl.SelectedTab = tabPage;
-                        }
-
-                        switchFocus(control, alreadyContainedFocus);
-                    }
-                }
-            }
-
-            void FocusGitConsole()
-            {
-                FillTerminalTab();
-                if (_consoleTabPage != null && CommitInfoTabControl.TabPages.Contains(_consoleTabPage))
-                {
-                    CommitInfoTabControl.SelectedTab = _consoleTabPage;
-                }
-            }
-
-            void FocusNextTab(bool forward = true)
-            {
-                int tabIndex = CommitInfoTabControl.SelectedIndex;
-                tabIndex += forward ? 1 : (CommitInfoTabControl.TabCount - 1);
-                CommitInfoTabControl.SelectedIndex = tabIndex % CommitInfoTabControl.TabCount;
-            }
-
-            void OpenWithDifftool()
-            {
-                if (revisionDiff.Visible)
-                {
-                    revisionDiff.ExecuteCommand(RevisionDiffControl.Command.OpenWithDifftool);
-                }
-                else if (fileTree.Visible)
-                {
-                    fileTree.ExecuteCommand(RevisionFileTreeControl.Command.OpenWithDifftool);
-                }
-            }
-
-            void OpenWithDifftoolFirstToLocal()
-            {
-                if (revisionDiff.Visible)
-                {
-                    revisionDiff.ExecuteCommand(RevisionDiffControl.Command.OpenWithDifftoolFirstToLocal);
-                }
-            }
-
-            void OpenWithDifftoolSelectedToLocal()
-            {
-                if (revisionDiff.Visible)
-                {
-                    revisionDiff.ExecuteCommand(RevisionDiffControl.Command.OpenWithDifftoolSelectedToLocal);
-                }
-            }
-
-            void EditFile()
-            {
-                if (revisionDiff.Visible)
-                {
-                    revisionDiff.ExecuteCommand(RevisionDiffControl.Command.EditFile);
-                }
-                else if (fileTree.Visible)
-                {
-                    fileTree.ExecuteCommand(RevisionFileTreeControl.Command.EditFile);
-                }
-            }
-
-            void RestoreFileStatusListFocus(Action action)
-            {
-                bool restoreFocus = revisionDiff.ContainsFocus;
-
-                action();
-
-                if (restoreFocus)
-                {
-                    revisionDiff.SwitchFocus(alreadyContainedFocus: false);
-                }
-            }
         }
 
         internal CommandStatus ExecuteCommand(Command cmd)
@@ -2428,9 +2108,6 @@ namespace GitUI.CommandsDialogs
             _splitterManager.AddSplitter(RevisionsSplitContainer, nameof(RevisionsSplitContainer));
             _splitterManager.AddSplitter(MainSplitContainer, nameof(MainSplitContainer));
             _splitterManager.AddSplitter(RightSplitContainer, nameof(RightSplitContainer));
-
-            revisionDiff.InitSplitterManager(_splitterManager);
-            fileTree.InitSplitterManager(_splitterManager);
 
             _splitterManager.RestoreSplitters();
             RefreshLayoutToggleButtonStates();
@@ -2602,7 +2279,6 @@ namespace GitUI.CommandsDialogs
                     // and to make it possible we add explicit branch filter and refresh.
                     if (AppSettings.ShowFirstParent && !found)
                     {
-                        _filterBranchHelper.SetBranchFilter(revision?.ToString(), refresh: true);
                         RevisionGrid.SetSelectedRevision(revision);
                     }
 
@@ -2884,101 +2560,12 @@ namespace GitUI.CommandsDialogs
         /// </summary>
         private void FillTerminalTab()
         {
-            if (!EnvUtils.RunningOnWindows() || !AppSettings.ShowConEmuTab.Value)
-            {
-                // ConEmu only works on WinNT
-                return;
-            }
-
-            if (_terminal != null)
-            {
-                // Terminal already created; give it focus
-                _terminal.Focus();
-                return;
-            }
-
-            if (_consoleTabPage != null)
-            {
-                // Tab page already created
-                return;
-            }
-
-            _consoleTabPage = new TabPage
-            {
-                Text = _consoleTabCaption.Text,
-                Name = _consoleTabCaption.Text
-            };
-            CommitInfoTabControl.Controls.Add(_consoleTabPage);
-
-            // We have to set ImageKey after it's added to the tab control
-            _consoleTabPage.ImageKey = nameof(Images.Console);
-
-            // Delay-create the terminal window when the tab is first selected
-            CommitInfoTabControl.Selecting += (sender, args) =>
-            {
-                if (args.TabPage != _consoleTabPage)
-                {
-                    return;
-                }
-
-                if (_terminal == null)
-                {
-                    // Lazy-create on first opening the tab
-                    _consoleTabPage.Controls.Clear();
-                    _consoleTabPage.Controls.Add(
-                        _terminal = new ConEmuControl
-                        {
-                            Dock = DockStyle.Fill,
-                            IsStatusbarVisible = false
-                        });
-                }
-
-                // If user has typed "exit" in there, restart the shell; otherwise just return
-                if (_terminal.IsConsoleEmulatorOpen)
-                {
-                    return;
-                }
-
-                // Create the terminal
-                var startInfo = new ConEmuStartInfo
-                {
-                    StartupDirectory = Module.WorkingDir,
-                    WhenConsoleProcessExits = WhenConsoleProcessExits.CloseConsoleEmulator
-                };
-
-                string shellType = AppSettings.ConEmuTerminal.Value;
-                startInfo.ConsoleProcessCommandLine = _shellProvider.GetShellCommandLine(shellType);
-
-                // Set path to git in this window (actually, effective with CMD only)
-                if (!string.IsNullOrEmpty(AppSettings.GitCommandValue))
-                {
-                    string dirGit = Path.GetDirectoryName(AppSettings.GitCommandValue);
-                    if (!string.IsNullOrEmpty(dirGit))
-                    {
-                        startInfo.SetEnv("PATH", dirGit + ";" + "%PATH%");
-                    }
-                }
-
-                try
-                {
-                    _terminal.Start(startInfo, ThreadHelper.JoinableTaskFactory, AppSettings.ConEmuStyle.Value, AppSettings.ConEmuFontSize.Value);
-                }
-                catch (InvalidOperationException)
-                {
-#if DEBUG
-                    MessageBox.Show(@"ConEmu appears to be missing. Please perform a full rebuild and try again.", Strings.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
-#else
-                    throw;
-#endif
-                }
-            };
         }
 
         public void ChangeTerminalActiveFolder(string path)
         {
             string shellType = AppSettings.ConEmuTerminal.Value;
             IShellDescriptor shell = _shellProvider.GetShell(shellType);
-            _terminal?.ChangeFolder(shell, path);
         }
 
         private void menuitemSparseWorkingCopy_Click(object sender, EventArgs e)
@@ -3070,61 +2657,6 @@ namespace GitUI.CommandsDialogs
 
         private void LayoutRevisionInfo()
         {
-            // Handle must be created prior to insertion
-            _ = CommitInfoTabControl.Handle;
-
-            RevisionInfo.SuspendLayout();
-            CommitInfoTabControl.SuspendLayout();
-            RevisionsSplitContainer.SuspendLayout();
-
-            var commitInfoPosition = AppSettings.CommitInfoPosition;
-            if (commitInfoPosition == CommitInfoPosition.BelowList)
-            {
-                CommitInfoTabControl.InsertIfNotExists(0, CommitInfoTabPage);
-                CommitInfoTabControl.SelectedTab = CommitInfoTabPage;
-
-                RevisionsSplitContainer.FixedPanel = FixedPanel.Panel2;
-                RevisionInfo.Parent = CommitInfoTabPage;
-                RevisionGridContainer.Parent = RevisionsSplitContainer.Panel1;
-                RevisionsSplitContainer.Panel2Collapsed = true;
-            }
-            else
-            {
-                // enough to fit CommitInfoHeader in most cases, when the width is (avatar + commit hash)
-                int width = DpiUtil.Scale(490) + SystemInformation.VerticalScrollBarWidth;
-                CommitInfoTabControl.RemoveIfExists(CommitInfoTabPage);
-
-                if (commitInfoPosition == CommitInfoPosition.RightwardFromList)
-                {
-                    RevisionsSplitContainer.FixedPanel = FixedPanel.Panel2;
-                    RevisionsSplitContainer.SplitterDistance = Math.Max(0, RevisionsSplitContainer.Width - width);
-                    RevisionInfo.Parent = RevisionsSplitContainer.Panel2;
-                    RevisionGridContainer.Parent = RevisionsSplitContainer.Panel1;
-                }
-                else if (commitInfoPosition == CommitInfoPosition.LeftwardFromList)
-                {
-                    RevisionsSplitContainer.FixedPanel = FixedPanel.Panel1;
-                    RevisionsSplitContainer.SplitterDistance = width;
-                    RevisionInfo.Parent = RevisionsSplitContainer.Panel1;
-                    RevisionGridContainer.Parent = RevisionsSplitContainer.Panel2;
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-
-                RevisionsSplitContainer.Panel2Collapsed = false;
-            }
-
-            RevisionInfo.Parent.BackColor = RevisionInfo.BackColor;
-            RevisionInfo.ResumeLayout(performLayout: true);
-
-            MainSplitContainer.Panel1.BackColor = Color.LightGray.AdaptBackColor();
-            RevisionsSplitContainer.Panel1.BackColor = Color.LightGray.AdaptBackColor();
-            RevisionsSplitContainer.Panel2.BackColor = Color.LightGray.AdaptBackColor();
-
-            CommitInfoTabControl.ResumeLayout(performLayout: true);
-            RevisionsSplitContainer.ResumeLayout(performLayout: true);
         }
 
         #endregion
@@ -3178,20 +2710,10 @@ namespace GitUI.CommandsDialogs
         {
             private readonly FormBrowse _form;
 
-            public FullBleedTabControl CommitInfoTabControl => _form.CommitInfoTabControl;
-
-            public TabPage DiffTabPage => _form.DiffTabPage;
-
-            public RevisionDiffControl RevisionDiffControl => _form.revisionDiff;
-
-            public TabPage TreeTabPage => _form.TreeTabPage;
-
             public TestAccessor(FormBrowse form)
             {
                 _form = form;
             }
-
-            public RepoObjectsTree RepoObjectsTree => _form.repoObjectsTree;
 
             public void PopulateFavouriteRepositoriesMenu(ToolStripDropDownItem container, IList<Repository> repositoryHistory)
             {
@@ -3201,51 +2723,6 @@ namespace GitUI.CommandsDialogs
 
         private void FormBrowse_DragDrop(object sender, DragEventArgs e)
         {
-            HandleDrop(e);
-        }
-
-        private void HandleDrop(DragEventArgs e)
-        {
-            if (TreeTabPage.Parent == null)
-            {
-                return;
-            }
-
-            var itemPath = (e.Data.GetData(DataFormats.Text) ?? e.Data.GetData(DataFormats.UnicodeText)) as string;
-            if (IsFileExistingInRepo(itemPath))
-            {
-                CommitInfoTabControl.SelectedTab = TreeTabPage;
-                fileTree.SelectFileOrFolder(itemPath);
-                return;
-            }
-
-            var paths = e.Data.GetData(DataFormats.FileDrop) as string[];
-            if (paths == null)
-            {
-                return;
-            }
-
-            foreach (string path in paths)
-            {
-                if (!IsFileExistingInRepo(path))
-                {
-                    continue;
-                }
-
-                if (CommitInfoTabControl.SelectedTab != TreeTabPage)
-                {
-                    CommitInfoTabControl.SelectedTab = TreeTabPage;
-                }
-
-                if (fileTree.SelectFileOrFolder(path))
-                {
-                    return;
-                }
-            }
-
-            bool IsPathExists(string path) => path != null && (File.Exists(path) || Directory.Exists(path));
-
-            bool IsFileExistingInRepo(string path) => IsPathExists(path) && path.StartsWith(Module.WorkingDir, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private void FormBrowse_DragEnter(object sender, DragEventArgs e)
