@@ -270,6 +270,8 @@ namespace GitUI.CommandsDialogs
 
             ManageWorktreeSupport();
 
+            WorkaroundToolbarLocationBug();
+
             var toolBackColor = SystemColors.Window;
             var toolForeColor = SystemColors.WindowText;
             BackColor = toolBackColor;
@@ -303,6 +305,16 @@ namespace GitUI.CommandsDialogs
             RevisionGrid.ToggledBetweenArtificialAndHeadCommits += (s, e) => FocusRevisionDiffFileStatusList();
 
             return;
+
+            void WorkaroundToolbarLocationBug()
+            {
+                // Layout engine bug (?) which may change the order of toolbars
+                // if the 1st one becomes longer than the 2nd toolbar's Location.X
+                // the layout engine will be place the 2nd toolbar first
+                toolPanel.TopToolStripPanel.Controls.Clear();
+                toolPanel.TopToolStripPanel.Controls.Add(ToolStripFilters);
+                toolPanel.TopToolStripPanel.Controls.Add(ToolStripMain);
+            }
 
             void FocusRevisionDiffFileStatusList()
             {
