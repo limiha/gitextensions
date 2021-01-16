@@ -320,6 +320,7 @@ namespace GitUI.CommandsDialogs
                 // if the 1st one becomes longer than the 2nd toolbar's Location.X
                 // the layout engine will be place the 2nd toolbar first
                 toolPanel.TopToolStripPanel.Controls.Clear();
+                toolPanel.TopToolStripPanel.Controls.Add(toolStripScripts);
                 toolPanel.TopToolStripPanel.Controls.Add(ToolStripFilters);
                 toolPanel.TopToolStripPanel.Controls.Add(ToolStripMain);
             }
@@ -1110,11 +1111,11 @@ namespace GitUI.CommandsDialogs
                     .Where(script => script.Enabled && script.OnEvent == ScriptEvent.ShowInUserMenuBar)
                     .ToList();
 
-                for (int i = ToolStripMain.Items.Count - 1; i >= 0; i--)
+                for (int i = toolStripScripts.Items.Count - 1; i >= 0; i--)
                 {
-                    if (ToolStripMain.Items[i].Tag as string == "userscript")
+                    if (toolStripScripts.Items[i].Tag as string == "userscript")
                     {
-                        ToolStripMain.Items.RemoveAt(i);
+                        toolStripScripts.Items.RemoveAt(i);
                     }
                 }
 
@@ -1123,7 +1124,7 @@ namespace GitUI.CommandsDialogs
                     return;
                 }
 
-                ToolStripMain.Items.Add(new ToolStripSeparator { Tag = "userscript" });
+                toolStripScripts.Items.Add(new ToolStripSeparator { Tag = "userscript" });
 
                 foreach (var script in scripts)
                 {
@@ -1147,7 +1148,7 @@ namespace GitUI.CommandsDialogs
                     };
 
                     // add to toolstrip
-                    ToolStripMain.Items.Add(button);
+                    toolStripScripts.Items.Add(button);
                 }
             }
 
