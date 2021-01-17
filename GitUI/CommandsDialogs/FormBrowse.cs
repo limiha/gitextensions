@@ -279,6 +279,14 @@ namespace GitUI.CommandsDialogs
             mainMenuStrip.BackColor = toolBackColor;
             mainMenuStrip.ForeColor = toolForeColor;
 
+            toolPanel.TopToolStripPanel.MouseClick += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    _formBrowseMenus.ShowToolStripContextMenu(Cursor.Position);
+                }
+            };
+
             InitToolStripStyles(toolForeColor, toolBackColor);
 
             foreach (var control in this.FindDescendants())
@@ -619,6 +627,8 @@ namespace GitUI.CommandsDialogs
 
         protected override void OnLoad(EventArgs e)
         {
+            _formBrowseMenus.CreateToolbarsMenus(ToolStripMain, ToolStripFilters, toolStripScripts);
+
             HideVariableMainMenuItems();
             RefreshSplitViewLayout();
             LayoutRevisionInfo();
